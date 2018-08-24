@@ -1,0 +1,72 @@
+<html><head>
+<title>Election results for {{ paper }}</title>
+<link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet"> 
+<link href="{{url_for('static', filename='elexstyles.css')}}" rel="stylesheet">
+</head>
+<body>
+
+{% for group in groupdict %}
+    <div class="group" id="{{ group|slugifier }}">
+        <h2>{{ group }}</h2>
+        {% for racename in groupdict[group] %}
+            {% set race = racedict[racename] %}
+            <div class="race" id="{{ racename|slugifier }}">
+                {% if racename != group %}
+                    <h3>{{ racename}}</h3>
+                {% endif %}
+                <table class="main" id="{{ racename|slugifier }}">
+                    <tr><th class="name"></th><th class="votes">Votes</th><th class="pct">Percent</th><th class="progress">&nbsp;</th></tr>
+                    {% for candidate in race['Candidates']  %}
+                        <tr>
+                            <td class="name">{{candidate}}</td>
+                            <td class="votes">{{ race['Candidates'][candidate]['Votes']|int|comma }}</td>
+                            <td class="pct">{{ (race['Candidates'][candidate]['Votes']|float / race['Votes']|float)|pct }}%</td>
+                            <td class="progress">&nbsp;<progress value="{{(race['Candidates'][candidate]['Votes']|float / race['Votes']|float)|pct|int}}" max="100"></progress></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <div class="tdnote">&nbsp;{{ race['PrecinctsR']|int|comma }} ({{ (race['PrecinctsR']|float / race['Precincts']|float)|pct}}%) of {{ race['Precincts']|int|comma }} precincts reporting at {{ timestamp }}. <span class="moreinfotag"><font size="+1">+</font> Details</span></div>
+
+<!-- ****************************************** ONLY SHOW MORE INFO IF THERE IS MORE THAN ONE COUNTY -->                
+                
+                <div class="moreinfo" id="moreinfoid-{{ racename|slugifier }}">
+                    <table class="moreinfo" id="moreinfoid-{{ racename|slugifier }}">
+                        <tr><th class="county">County</th><th class="name">Candidate</th><th class="Votes">Votes</th><th class="pct">Percent</th></tr>
+                        {% set lastcounty = "vodka" %}
+                        {% for county in race['Counties'] %}
+                            {% for candidate in race['Candidates']  %}
+                            <tr>
+                                {% if county != lastcounty %}
+                                    <td class="county">{{ county }} County</td>
+                                {% else %}
+                                    <td class="county"> {{county}} FUCK</td>
+                                {% endif %}
+                                <td class="name">{{candidate}}</td>
+                                <td class="votes">{{ race['Counties'][county][candidate]|int|comma }}</td>
+                                <td class="pct">
+                                    {% if race['Counties'][county]['Votes'] == 0 %}
+                                        0.0%</td>
+                                    {% else %}
+                                        {{ (race['Counties'][county][candidate]|float / race['Counties'][county]['Votes']|float)|pct }}%</td>
+                                    {% endif %}
+                            </tr>
+                            {% set lastcounty = county %}
+                            {% endfor %}
+                        
+                        {% endfor %}
+                        
+                        
+                        
+                        
+                    </table>
+                
+                </div>
+                
+                
+                
+            </div>
+        {% endfor %}
+    </div>
+{% endfor %}
+</body>
+</html>           

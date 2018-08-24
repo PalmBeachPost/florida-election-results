@@ -1,2 +1,3 @@
 frozen-flask
 flask
+awesome-slugify

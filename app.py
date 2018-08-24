@@ -7,6 +7,17 @@
 """
 To-do list:
 Do we sort by vote?
+Implement county details
+Move to dynamic data tables thingy?
+Templatize route building
+Build route for group pages
+Build generator for group, main pages
+Build out Frozen Flask
+Add in Pym or Seattle iframe solution -> Can we test with GateHouse?
+Build route for paper pages
+Build template for paper pages
+
+
 
 Allow resorting of group names, e.g., Governor, then U.S. Senate, then U.S. House?
 Simplify party names when there are more (Green, Reform)
@@ -16,6 +27,10 @@ Cure cancer
 Foment world peace
 
 Done:
+Build styles
+Tag TD, TH elements
+
+Votes not getting set under racedict[race]
 Actually parse stuff
 Clean up judicial shit
 Build rounder tool; watch for zeroes
@@ -25,6 +40,9 @@ Count votes at county-candidate and candidate levels
 Not doing:
 Calculate PrecinctRPct
 Calculate candidate vote share
+Build PrecinctsRPct into racedict-race-Counties-name, racedict-race-Candidates
+Build Votes, VoteP into racedict-race-Candidates-name and racedict-race-Counties-name
+
 """
 
 
@@ -33,8 +51,7 @@ Calculate candidate vote share
 
 from flask import Flask, render_template, redirect, url_for, request   # External dependency
 from flask_frozen import Freezer
-from slugify import slugify   # awesome-slugify, from requirements
-
+from slugify import slugify, Slugify, UniqueSlugify  # awesome-slugify, from requirements
 import csv
 import glob
 import time
@@ -49,7 +66,6 @@ import sys
 
 
 primary = True
-elexdate = "20180828"
 datadir = "snapshots/"
 racedelim = " -- "    # E.g., "U.S. Senator -- Rep."
 papers = {
@@ -80,17 +96,22 @@ if len(glob.glob(folder + "*")) != 4:   # 3 file native file types and a done fi
 # In[5]:
 
 
-@app.template_filter('timestamp')
 def get_timestamp():
     global folder
     rawtimestamp = folder.split("-")[1].replace("/", "")
     hour = int(rawtimestamp[0:2])
+    pm = False
     if hour > 12:
         hour = hour -12
+        pm = True
     if hour == 0:
         hour = 12
     hour = str(hour)
     timestamp = hour + ":" + rawtimestamp[2:4]
+    if pm:
+        timestamp = timestamp + " p.m."
+    else:
+        timestamp = timestamp + " a.m."
     return(timestamp)
 
 
@@ -106,29 +127,36 @@ def comma(input):
 # In[7]:
 
 
-@app.template_filter('pct')
-def pct(top, bottom):
-    if bottom == 0 or top == 0:
-        result = 0
-    else: 
-        result = round(float(top*100)/float(bottom), 1)
-    return(result)
+# @app.template_filter('pct')
+# def pct(top, bottom):
+    # if bottom == 0 or top == 0:
+        # result = 0
+    # else: 
+        # result = round(float(top*100)/float(bottom), 1)
+    # return(result)
 
+@app.template_filter('pct')
+def pct(incoming):
+    if incoming == 0:
+        result = 0
+    else:
+        result = round(100*float(incoming), 1)
+    return(result)
+    
 
 # In[8]:
 
 
 @app.template_filter('slugifier')
 def slugifier(text):
-    return(slugify(text), to_lower=True)
-
-
-# In[9]:
+    return(slugify(text, to_lower=True))
 
 
 def cleanrow(row):
     global primary
     global racedelim
+    for item in row:
+        row[item] = row[item].strip()     # 2016 had spaces all over the place
     for item in ("Precincts", "PrecinctsReporting", "CanVotes"):
         row[item] = int(row[item])    # Turn into numbers
     partysubs = [
@@ -173,7 +201,10 @@ def cleanrow(row):
         else:
             row['FullRace'] = row['RaceName'] + racedelim + row['ShortParty']
             row['Partisan'] = 1
-    row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameMiddle'], row['CanNameLast']])).replace("  ", " ")
+    if len(row['CanNameMiddle']) >6: # If this name is getting long
+        row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameLast']])).replace("  ", " ")
+    else:
+        row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameMiddle'], row['CanNameLast']])).replace("  ", " ")
     return(row)
 
 
@@ -241,6 +272,7 @@ for row in masterlist:
     racedict[row['FullRace']]['Counties'][row['CountyName']]['Votes'] += row['CanVotes']
     racedict[row['FullRace']]['Candidates'][row['FullName']]['Votes'] += row['CanVotes']
     racedict[row['FullRace']]['Counties'][row['CountyName']][row['FullName']] = row['CanVotes']
+    racedict[row['FullRace']]['Votes'] += row['CanVotes']
     
 
 
@@ -295,17 +327,23 @@ for paper in paperdict:   # HEY!
 # In[17]:
 
 
-@app.route('/' + elexdate + '/<paper>/main.html')
+@app.route('/<paper>/main.html')
 def maintemplate(paper):
     print("Trying to generate for " + paper)
     template = 'core.html'
     global paperdict
     global racedict
     global papergroupdict
+    global countydict
     groupdict = papergroupdict[paper]
-    return render_template(template, groupdict=groupdict,
-                           papergroupdict=papergroupdict, racedict=racedict,
-                           paperdict=paperdict, paper=paper)
+    return render_template(template,
+                           groupdict=groupdict,
+                           papergroupdict=papergroupdict,
+                           racedict=racedict,
+                           paperdict=paperdict,
+                           paper=paper,
+                           countydict=countydict,
+                           timestamp=get_timestamp())
 
 
 # In[18]:

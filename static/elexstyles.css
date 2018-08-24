@@ -1,0 +1,55 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.8em;
+
+}
+
+.group{
+}
+
+.race{
+    margin-left: 1em;    
+}
+
+table{
+    width: 100%;
+    border: 0;
+    margin: 0;
+}
+
+h1, h2, h3, h4, h5, .name, .progress, .county {
+    text-align: left;
+}
+
+h1, h2, h3, h4, h5 {
+    margin-bottom: 0em;
+}
+
+
+.votes, .pct {
+    text-align: right;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.8em;
+}
+
+progress {
+    width: 95%;
+}
+
+td.progress {
+    min-width: 33%;
+}
+
+.tdnote {
+    font-style: italic;
+}
+
+.moreinfotag {
+    font-style: normal;
+    font-weight: 700;
+    color: DarkGreen;
+}
+
+div.moreinfo {
+    display: none;
+}
