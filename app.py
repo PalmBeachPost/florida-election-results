@@ -205,6 +205,8 @@ def cleanrow(row):
         row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameLast']])).replace("  ", " ")
     else:
         row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameMiddle'], row['CanNameLast']])).replace("  ", " ")
+    # And let's ignore up top:
+    row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameLast']])).replace("  ", " ")
     return(row)
 
 

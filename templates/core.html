@@ -20,13 +20,14 @@
                         <tr><td class="name">{{candidate}}</td><td class="votes">{{ race['Candidates'][candidate]['Votes']|int|comma }}</td><td class="pct">{{ (race['Candidates'][candidate]['Votes']|float / race['Votes']|float)|pct }}%</td><td class="progress">&nbsp;<progress value="{{(race['Candidates'][candidate]['Votes']|float / race['Votes']|float)|pct|int}}" max="100"></progress></td></tr>
                     {%- endfor -%}
                 </table>
-                <div class="tdnote">&nbsp;{{ race['PrecinctsR']|int|comma }} ({{ (race['PrecinctsR']|float / race['Precincts']|float)|pct}}%) of {{ race['Precincts']|int|comma }} precincts reporting at {{ timestamp }}. <span class="moreinfotag"><font size="+1">+</font> Details</span></div>
+                <div class="tdnote">&nbsp;{{ race['PrecinctsR']|int|comma }} ({{ (race['PrecinctsR']|float / race['Precincts']|float)|pct}}%) of {{ race['Precincts']|int|comma }} precincts reporting at {{ timestamp }}. 
+                <span class="moreinfotag"><button onclick="moreinfoid{{ racename|slugifier|replace("-", "") }}()"><font size="+1">+</font> Details</button></span></div><script>function moreinfoid{{ racename|slugifier|replace("-", "") }}(){var n=document.getElementById("moreinfoid{{ racename|slugifier|replace("-", "") }}");"none"===n.style.display?n.style.display="block":n.style.display="none"}</script>
 
 <!-- ****************************************** ONLY SHOW MORE INFO IF THERE IS MORE THAN ONE COUNTY -->   
 <!-- Is this maybe a distinction between race as an object and race as a string? -->             
                 
-                <div class="moreinfo" id="moreinfoid-{{ racename|slugifier }}">
-                    <table class="moreinfo" id="moreinfoid-{{ racename|slugifier }}">
+                <div class="moreinfo" id="moreinfoid{{ racename|slugifier|replace("-", "") }}">
+                    <table class="moreinfo" id="moreinfoid-{{ racename|slugifier }}-inside">
                         <tr><th class="county">County</th><th class="name">Candidate</th><th class="Votes">Votes</th><th class="pct">Percent</th></tr>
                         {% set lastcounty = "vodka" %}
                         {% for county in race['Counties'] %}
