@@ -19,10 +19,25 @@ table{
 
 h1, h2, h3, h4, h5, .name, .progress, .county {
     text-align: left;
+    vertical-align: top;
 }
+
+.votes, .pct {
+    vertical-align: top;
+}
+
 
 h1, h2, h3, h4, h5 {
     margin-bottom: 0em;
+}
+
+
+th.name, th.votes, th.pct, td.name, td.votes, td.pct {
+    width: 20%
+}
+
+th.progress, td.progress {
+    width: 40%
 }
 
 

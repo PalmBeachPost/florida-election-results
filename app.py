@@ -348,6 +348,36 @@ def maintemplate(paper):
 
 # In[18]:
 
+@app.route('/')
+def bigpicture():
+    print("Trying to generate big-picture template")
+    global paperdict
+    template = "bigpicture.html"
+    return render_template(template,
+                           paperdict=paperdict,
+                           timestamp=get_timestamp())
+
+@app.route('/<paper>/')
+def smallpicture(paper):
+    print("Trying to generate small-picture template for " + paper)
+    template = 'smallpicture.html'
+    global paperdict
+    global racedict
+    global papergroupdict
+    global countydict
+    groupdict = papergroupdict[paper]
+    return render_template(template,
+                           groupdict=groupdict,
+                           papergroupdict=papergroupdict,
+                           racedict=racedict,
+                           paperdict=paperdict,
+                           paper=paper,
+                           countydict=countydict,
+                           timestamp=get_timestamp())
+
+                           
+                           
+
 
 if __name__ == '__main__':
     # Fire up the Flask test server
@@ -364,8 +394,11 @@ if __name__ == '__main__':
 #        stdout, stderr = p.communicate()
 #        print("\tProcessing should be complete.")
     else:
-        from werkzeug.serving import run_simple
+        # from werkzeug.serving import run_simple
         app.config.update(FREEZER_BASE_URL="/", FREEZER_RELATIVE_URLS=True)
+        # app.jinja_env.trim_blocks = True
+        # app.jinja_env.lstrip_blocks = True
+
         app.run(debug=True, use_reloader=True, host="0.0.0.0")
         # run_simple('localhost', 5000, app)
 

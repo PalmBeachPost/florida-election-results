@@ -5,29 +5,25 @@
 </head>
 <body>
 
-{% for group in groupdict %}
+{%- for group in groupdict -%}
     <div class="group" id="{{ group|slugifier }}">
         <h2>{{ group }}</h2>
-        {% for racename in groupdict[group] %}
-            {% set race = racedict[racename] %}
+        {%- for racename in groupdict[group] -%}
+            {%- set race = racedict[racename] -%}
             <div class="race" id="{{ racename|slugifier }}">
-                {% if racename != group %}
+                {%- if racename != group -%}
                     <h3>{{ racename}}</h3>
                 {% endif %}
                 <table class="main" id="{{ racename|slugifier }}">
                     <tr><th class="name"></th><th class="votes">Votes</th><th class="pct">Percent</th><th class="progress">&nbsp;</th></tr>
-                    {% for candidate in race['Candidates']  %}
-                        <tr>
-                            <td class="name">{{candidate}}</td>
-                            <td class="votes">{{ race['Candidates'][candidate]['Votes']|int|comma }}</td>
-                            <td class="pct">{{ (race['Candidates'][candidate]['Votes']|float / race['Votes']|float)|pct }}%</td>
-                            <td class="progress">&nbsp;<progress value="{{(race['Candidates'][candidate]['Votes']|float / race['Votes']|float)|pct|int}}" max="100"></progress></td>
-                        </tr>
-                    {% endfor %}
+                    {%- for candidate in race['Candidates']  -%}
+                        <tr><td class="name">{{candidate}}</td><td class="votes">{{ race['Candidates'][candidate]['Votes']|int|comma }}</td><td class="pct">{{ (race['Candidates'][candidate]['Votes']|float / race['Votes']|float)|pct }}%</td><td class="progress">&nbsp;<progress value="{{(race['Candidates'][candidate]['Votes']|float / race['Votes']|float)|pct|int}}" max="100"></progress></td></tr>
+                    {%- endfor -%}
                 </table>
                 <div class="tdnote">&nbsp;{{ race['PrecinctsR']|int|comma }} ({{ (race['PrecinctsR']|float / race['Precincts']|float)|pct}}%) of {{ race['Precincts']|int|comma }} precincts reporting at {{ timestamp }}. <span class="moreinfotag"><font size="+1">+</font> Details</span></div>
 
-<!-- ****************************************** ONLY SHOW MORE INFO IF THERE IS MORE THAN ONE COUNTY -->                
+<!-- ****************************************** ONLY SHOW MORE INFO IF THERE IS MORE THAN ONE COUNTY -->   
+<!-- Is this maybe a distinction between race as an object and race as a string? -->             
                 
                 <div class="moreinfo" id="moreinfoid-{{ racename|slugifier }}">
                     <table class="moreinfo" id="moreinfoid-{{ racename|slugifier }}">
@@ -36,20 +32,16 @@
                         {% for county in race['Counties'] %}
                             {% for candidate in race['Candidates']  %}
                             <tr>
-                                {% if county != lastcounty %}
+                                {%- if county != lastcounty -%}
                                     <td class="county">{{ county }} County</td>
-                                {% else %}
+                                {%- else -%}
                                     <td class="county"> {{county}} FUCK</td>
-                                {% endif %}
-                                <td class="name">{{candidate}}</td>
-                                <td class="votes">{{ race['Counties'][county][candidate]|int|comma }}</td>
-                                <td class="pct">
-                                    {% if race['Counties'][county]['Votes'] == 0 %}
+                                {% endif %}<td class="name">{{candidate}}</td><td class="votes">{{ race['Counties'][county][candidate]|int|comma }}</td><td class="pct">
+                                    {%- if race['Counties'][county]['Votes'] == 0 -%}
                                         0.0%</td>
-                                    {% else %}
+                                    {%- else -%}
                                         {{ (race['Counties'][county][candidate]|float / race['Counties'][county]['Votes']|float)|pct }}%</td>
-                                    {% endif %}
-                            </tr>
+                                    {%- endif %}</tr>
                             {% set lastcounty = county %}
                             {% endfor %}
                         

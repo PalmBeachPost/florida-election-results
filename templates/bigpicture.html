@@ -1,0 +1,11 @@
+<html><head></head>
+<body>
+<ul>
+{% for paper in paperdict %}
+    <li><a href="{{ url_for("/" + paper + "/main.html") }}">{{ paper }} elections</a>
+{% endfor %}
+</ul>
+
+Files updated at {{ timestamp }}
+</body>
+</html>
