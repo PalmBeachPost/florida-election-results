@@ -84,6 +84,7 @@ papers = {
 
 
 app = Flask(__name__)
+freezer = Freezer(app)
 pp = pprint.PrettyPrinter(indent=4)
 folders = sorted(list(glob.glob(datadir + "*")), reverse=True)    # Find the latest time-stamped folder
 folder = folders[0] + "/"
@@ -348,6 +349,13 @@ def maintemplate(paper):
                            countydict=countydict,
                            timestamp=get_timestamp())
 
+@freezer.register_generator
+def getpapernames():
+    global paperdict
+    for paper in paperdict:
+        yield "/" + paper + "/main.html"                          
+                           
+                           
 
 # In[18]:
 
