@@ -339,6 +339,7 @@ def maintemplate(paper):
     global countydict
     groupdict = papergroupdict[paper]
     return render_template(template,
+                           DetailsWanted=False,
                            groupdict=groupdict,
                            papergroupdict=papergroupdict,
                            racedict=racedict,
@@ -350,32 +351,32 @@ def maintemplate(paper):
 
 # In[18]:
 
-@app.route('/')
-def bigpicture():
-    print("Trying to generate big-picture template")
-    global paperdict
-    template = "bigpicture.html"
-    return render_template(template,
-                           paperdict=paperdict,
-                           timestamp=get_timestamp())
+# @app.route('/')
+# def bigpicture():
+    # print("Trying to generate big-picture template")
+    # global paperdict
+    # template = "bigpicture.html"
+    # return render_template(template,
+                           # paperdict=paperdict,
+                           # timestamp=get_timestamp())
 
-@app.route('/<paper>/')
-def smallpicture(paper):
-    print("Trying to generate small-picture template for " + paper)
-    template = 'smallpicture.html'
-    global paperdict
-    global racedict
-    global papergroupdict
-    global countydict
-    groupdict = papergroupdict[paper]
-    return render_template(template,
-                           groupdict=groupdict,
-                           papergroupdict=papergroupdict,
-                           racedict=racedict,
-                           paperdict=paperdict,
-                           paper=paper,
-                           countydict=countydict,
-                           timestamp=get_timestamp())
+# @app.route('/<paper>/')
+# def smallpicture(paper):
+    # print("Trying to generate small-picture template for " + paper)
+    # template = 'smallpicture.html'
+    # global paperdict
+    # global racedict
+    # global papergroupdict
+    # global countydict
+    # groupdict = papergroupdict[paper]
+    # return render_template(template,
+                           # groupdict=groupdict,
+                           # papergroupdict=papergroupdict,
+                           # racedict=racedict,
+                           # paperdict=paperdict,
+                           # paper=paper,
+                           # countydict=countydict,
+                           # timestamp=get_timestamp())
 
                            
                            

@@ -11,18 +11,24 @@ body {
     margin-left: 1em;    
 }
 
-table{
+table.main{
     width: 100%;
     border: 0;
     margin: 0;
+
 }
+
+table.main     tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
 
 h1, h2, h3, h4, h5, .name, .progress, .county {
     text-align: left;
     vertical-align: top;
 }
 
-.votes, .pct {
+.votes, .pct, .morevotes, .morepct {
     vertical-align: top;
 }
 
@@ -41,7 +47,7 @@ th.progress, td.progress {
 }
 
 
-.votes, .pct {
+.votes, .pct, .morevotes, .morepct {
     text-align: right;
     font-family: 'Roboto Mono', monospace;
     font-size: 0.8em;
@@ -68,3 +74,26 @@ td.progress {
 div.moreinfo {
     display: none;
 }
+
+.tablemoreinfo {
+    background-color: #F8F9F9;
+    border-color: #e2e2e2;
+    border-width: 9px;
+    border-style: solid;
+    margin-left: auto;
+    margin-right: auto;
+    /* width: 90%; */
+}
+
+.tablemoreinfo tr:nth-child(odd) {
+    background-color: #e2e2e2;
+}
+
+
+button {
+    background-color: #FFFFFF
+    border: none;
+    padding: 0;
+    display: inline-block;
+}
+
