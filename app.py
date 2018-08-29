@@ -91,11 +91,14 @@ freezer = Freezer(app)
 pp = pprint.PrettyPrinter(indent=4)
 folders = sorted(list(glob.glob(datadir + "*")), reverse=True)    # Find the latest time-stamped folder
 folder = folders[0] + "/"
-if len(glob.glob(folder + "*")) != 6:   # 3 file native file types and a done file AND 2 PBC files. If not 6 files, it's not done
-    time.sleep(10)   # 10 seconds to beat a race condition
-    if len(glob.glob(folders[0] + "/*")) != 6:
+# if len(glob.glob(folder + "*")) != 6:   # 3 file native file types and a done file AND 2 PBC files. If not 6 files, it's not done
+    # time.sleep(10)   # 10 seconds to beat a race condition
+    # if len(glob.glob(folders[0] + "/*")) != 6:
+        # print(quit)
+if not os.path.exists(folder + "done"):
+    time.sleep(10)   # Try to beat a race condition
+    if not os.path.exists(folder + "done"):
         print(quit)
-
 
 # In[5]:
 
@@ -217,7 +220,7 @@ def cleanrow(row):
 # In[10]:
 
 
-with open(folder + "results.txt", "r") as f:    # Import the data and do some basic cleaning
+with open(folder + "resultsv2.txt", "r") as f:    # Import the data and do some basic cleaning
     masterlist = []
     for row in csv.DictReader(f, delimiter="\t"):
         masterlist.append(cleanrow(row))
