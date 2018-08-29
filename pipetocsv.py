@@ -125,10 +125,3 @@ with open(folder + "resultsv2.txt", "w", newline="") as f:
         line['CanVotes'] = votes
         target = line.values()
         writer.writerow(target)
-
-
-# In[7]:
-
-
-print(line)
-
