@@ -10,9 +10,9 @@ baseurl = "http://fldoselectionfiles.elections.myflorida.com/enightfilespublic/"
 pbcbaseurl = "http://results.enr.clarityelections.com/FL/Palm_Beach/76579/210260/reports/"
 
 filetypes = [
-    ('results', '_ElecResultsFL.txt'),
-    ('info', '_ElecResultsFL_PipeDlm_Info.txt'),
-    ('votes', '_ElecResultsFL_PipeDlm_Votes.txt'),
+    ('results.txt', '_ElecResultsFL.txt'),
+    ('info.txt', '_ElecResultsFL_PipeDlm_Info.txt'),
+    ('votes.txt', '_ElecResultsFL_PipeDlm_Votes.txt'),
 ]
 
 pbcfiletypes = [
@@ -32,7 +32,7 @@ print ("Saving to " + path)
 os.makedirs(path, exist_ok=True)
 for filetype in filetypes:
     local, remote = filetype
-    with open(path + local + ".txt", "wb") as f:
+    with open(path + local, "wb") as f:
         f.write(requests.get(baseurl + elexcode + remote).content)
 for filetype in pbcfiletypes:
     with open(path + filetype, "wb") as f:
