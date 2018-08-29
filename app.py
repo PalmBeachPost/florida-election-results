@@ -88,7 +88,7 @@ freezer = Freezer(app)
 pp = pprint.PrettyPrinter(indent=4)
 folders = sorted(list(glob.glob(datadir + "*")), reverse=True)    # Find the latest time-stamped folder
 folder = folders[0] + "/"
-if len(glob.glob(folder + "*")) != 4:   # 3 file native file types and a done file. If not 4 files, it's not done
+if len(glob.glob(folder + "*")) != 6:   # 3 file native file types and a done file AND 2 PBC files. If not 6 files, it's not done
     time.sleep(10)   # 10 seconds to beat a race condition
     if len(glob.glob(folders[0] + "/*")) != 4:
         print(quit)
