@@ -52,6 +52,7 @@ Build Votes, VoteP into racedict-race-Candidates-name and racedict-race-Counties
 from flask import Flask, render_template, redirect, url_for, request   # External dependency
 from flask_frozen import Freezer
 from slugify import slugify, Slugify, UniqueSlugify  # awesome-slugify, from requirements
+
 import csv
 import glob
 import time
@@ -60,13 +61,15 @@ from collections import OrderedDict
 import pprint
 import os
 import sys
+from subprocess import Popen
 
 
 # In[3]:
 
-
 primary = True
 datadir = "snapshots/"
+homedir = r'/root/data/florida-election-results'
+
 racedelim = " -- "    # E.g., "U.S. Senator -- Rep."
 papers = {
     "palmbeachpost": ["Palm Beach", "Martin", "St. Lucie"],
@@ -401,9 +404,10 @@ if __name__ == '__main__':
         except WindowsError:
             print("\tGot that standard Windows error about deleting Git stuff. Life goes on.")
         print("\tAttempting to run post-processing script.")
-#         p = Popen("postbake.bat", cwd=r"d:\data\homicides")
-#        stdout, stderr = p.communicate()
-#        print("\tProcessing should be complete.")
+#         p = Popen(homedir + '/' + "postbake.sh", cwd=homedir)
+        p = Popen(homedir + '/' + "postbake.sh", cwd=homedir)
+        stdout, stderr = p.communicate()
+        print("\tProcessing should be complete.")
     else:
         # from werkzeug.serving import run_simple
         app.config.update(FREEZER_BASE_URL="/", FREEZER_RELATIVE_URLS=True)
