@@ -51,10 +51,10 @@ for row in rows:
     row = row[1:-1]   # Lose [] line wrappers
     if "[" in row:    # Stupid unicode fix
         print("Crappy row with '[': " + row)
-        row = row[row.find("[")+1:]
+        row = str(row[row.find("[")+1:])
         print("Fixed row: " + row)
-    masterinfo.append(row)
-    try: 
+    if len(row) > 4:
+        masterinfo.append(row)
         if row[0] == "r":    # If we have a race identifier
             fields = row.split("|")
             raceid = fields[5]
@@ -90,8 +90,6 @@ for row in rows:
             masterraces[raceid]['Counties'][unitid]['Precincts'] = precincts
         else:
             print(row)
-    except:
-        print("Bad row?" + row)
 
 
 # In[10]:
