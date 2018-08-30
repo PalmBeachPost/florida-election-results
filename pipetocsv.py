@@ -7,6 +7,8 @@
 import csv
 import glob
 from collections import OrderedDict
+import os
+import time
 
 
 # In[2]:
@@ -21,9 +23,9 @@ datadir = "snapshots/"
 
 folders = sorted(list(glob.glob(datadir + "*")), reverse=True)    # Find the latest time-stamped folder
 folder = folders[0] + "/"
-if len(glob.glob(folder + "*")) != 6:   # 3 file native file types and a done file AND 2 PBC files. If not 6 files, it's not done
-    time.sleep(10)   # 10 seconds to beat a race condition
-    if len(glob.glob(folders[0] + "/*")) != 6:
+if not os.path.exists(folder + "done"):
+    time.sleep(10)   # Try to beat a race condition
+    if not os.path.exists(folder + "done"):
         print(quit)
 
 
@@ -42,47 +44,54 @@ masterraces = OrderedDict()
 mastercandidates = OrderedDict()
 masterunits = OrderedDict()
 
-with open(folder + "info.txt") as f:
+with open(folder + "info.txt", encoding="utf-8") as f:
     rows = f.readlines()
 for row in rows:
     row = row.strip()
-    row = row[1:-1]
+    row = row[1:-1]   # Lose [] line wrappers
+    if "[" in row:    # Stupid unicode fix
+        print("Crappy row with '[': " + row)
+        row = row[row.find("[")+1:]
+        print("Fixed row: " + row)
     masterinfo.append(row)
-    if row[0] == "r":    # If we have a race identifier
-        fields = row.split("|")
-        raceid = fields[5]
-        electiontype = fields[4]
-        racename = fields[3]
-        masterraces[raceid] = {}
-        masterraces[raceid]["electiontype"] = electiontype
-        masterraces[raceid]["racename"] = racename
-        masterraces[raceid]["Candidates"] = OrderedDict()
-        masterraces[raceid]['Counties'] = OrderedDict()
-    elif row[0] == "c":   # If we have a candidate identifier
-        fields = row.split("|")
-        candidateid = fields[6]
-        candidatefirstname = fields[5]
-        candidatelastname = fields[4]
-        fullname = candidatefirstname + " " + candidatelastname
-        raceid = fields[3]
-        masterraces[raceid]['Candidates'][candidateid] = {}
-        masterraces[raceid]['Candidates'][candidateid]['firstname'] = candidatefirstname
-        masterraces[raceid]['Candidates'][candidateid]['lastname'] = candidatelastname
-        mastercandidates[candidateid] = raceid
-    elif row[0] == "u":
-        fields = row.split("|")
-        unitid = fields[4]
-        unitname = fields[3]
-        masterunits[unitid] = unitname
-    elif row[0] == "p":
-        fields = row.split("|")
-        precincts = fields[5]
-        unitid = fields[4]
-        raceid = fields[3]
-        masterraces[raceid]['Counties'][unitid] = OrderedDict()
-        masterraces[raceid]['Counties'][unitid]['Precincts'] = precincts
-    else:
-        print(row)
+    try: 
+        if row[0] == "r":    # If we have a race identifier
+            fields = row.split("|")
+            raceid = fields[5]
+            electiontype = fields[4]
+            racename = fields[3]
+            masterraces[raceid] = {}
+            masterraces[raceid]["electiontype"] = electiontype
+            masterraces[raceid]["racename"] = racename
+            masterraces[raceid]["Candidates"] = OrderedDict()
+            masterraces[raceid]['Counties'] = OrderedDict()
+        elif row[0] == "c":   # If we have a candidate identifier
+            fields = row.split("|")
+            candidateid = fields[6]
+            candidatefirstname = fields[5]
+            candidatelastname = fields[4]
+            fullname = candidatefirstname + " " + candidatelastname
+            raceid = fields[3]
+            masterraces[raceid]['Candidates'][candidateid] = {}
+            masterraces[raceid]['Candidates'][candidateid]['firstname'] = candidatefirstname
+            masterraces[raceid]['Candidates'][candidateid]['lastname'] = candidatelastname
+            mastercandidates[candidateid] = raceid
+        elif row[0] == "u":
+            fields = row.split("|")
+            unitid = fields[4]
+            unitname = fields[3]
+            masterunits[unitid] = unitname
+        elif row[0] == "p":
+            fields = row.split("|")
+            precincts = fields[5]
+            unitid = fields[4]
+            raceid = fields[3]
+            masterraces[raceid]['Counties'][unitid] = OrderedDict()
+            masterraces[raceid]['Counties'][unitid]['Precincts'] = precincts
+        else:
+            print(row)
+    except:
+        print("Bad row?" + row)
 
 
 # In[10]:
