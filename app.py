@@ -1,11 +1,8 @@
-
 # coding: utf-8
-
-# In[1]:
-
-
+# Built for Python 3
 """
 To-do list:
+Move to external config file with list of papers, folder names
 Do we sort by vote?
 Implement county details
 Move to dynamic data tables thingy?
@@ -44,15 +41,6 @@ Build PrecinctsRPct into racedict-race-Counties-name, racedict-race-Candidates
 Build Votes, VoteP into racedict-race-Candidates-name and racedict-race-Counties-name
 
 """
-
-
-# In[2]:
-
-
-from flask import Flask, render_template, redirect, url_for, request   # External dependency
-from flask_frozen import Freezer
-from slugify import slugify, Slugify, UniqueSlugify  # awesome-slugify, from requirements
-
 import csv
 import glob
 import time
@@ -63,8 +51,10 @@ import os
 import sys
 from subprocess import Popen
 
+from flask import Flask, render_template, redirect, url_for, request   # External dependency
+from flask_frozen import Freezer
+from slugify import slugify, Slugify, UniqueSlugify  # awesome-slugify, from requirements
 
-# In[3]:
 
 primary = True
 datadir = "snapshots/"
@@ -82,25 +72,15 @@ papers = {
     "lakeland": ["Polk"]
 }
 
-
-# In[4]:
-
-
 app = Flask(__name__)
 freezer = Freezer(app)
 pp = pprint.PrettyPrinter(indent=4)
-folders = sorted(list(glob.glob(datadir + "*")), reverse=True)    # Find the latest time-stamped folder
+folders = sorted(list(glob.glob(datadir + "*")), reverse=True)  # Find the latest time-stamped folder
 folder = folders[0] + "/"
-# if len(glob.glob(folder + "*")) != 6:   # 3 file native file types and a done file AND 2 PBC files. If not 6 files, it's not done
-    # time.sleep(10)   # 10 seconds to beat a race condition
-    # if len(glob.glob(folders[0] + "/*")) != 6:
-        # print(quit)
 if not os.path.exists(folder + "done"):
     time.sleep(10)   # Try to beat a race condition
     if not os.path.exists(folder + "done"):
         print(quit)
-
-# In[5]:
 
 
 def get_timestamp():
@@ -122,25 +102,10 @@ def get_timestamp():
     return(timestamp)
 
 
-# In[6]:
-
-
 @app.template_filter('comma')
 def comma(input):
     return("{:,}".format(input))
-    
 
-
-# In[7]:
-
-
-# @app.template_filter('pct')
-# def pct(top, bottom):
-    # if bottom == 0 or top == 0:
-        # result = 0
-    # else: 
-        # result = round(float(top*100)/float(bottom), 1)
-    # return(result)
 
 @app.template_filter('pct')
 def pct(incoming):
@@ -149,9 +114,6 @@ def pct(incoming):
     else:
         result = round(100*float(incoming), 1)
     return(result)
-    
-
-# In[8]:
 
 
 @app.template_filter('slugifier')
@@ -208,25 +170,19 @@ def cleanrow(row):
         else:
             row['FullRace'] = row['RaceName'] + racedelim + row['ShortParty']
             row['Partisan'] = 1
-    if len(row['CanNameMiddle']) >6: # If this name is getting long
-        row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameLast']])).replace("  ", " ")
-    else:
-        row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameMiddle'], row['CanNameLast']])).replace("  ", " ")
+    # if len(row['CanNameMiddle']) >6: # If this name is getting long
+        # row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameLast']])).replace("  ", " ")
+    # else:
+        # row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameMiddle'], row['CanNameLast']])).replace("  ", " ")
     # And let's ignore up top:
     row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameLast']])).replace("  ", " ")
     return(row)
-
-
-# In[10]:
 
 
 with open(folder + "resultsv2.txt", "r") as f:    # Import the data and do some basic cleaning
     masterlist = []
     for row in csv.DictReader(f, delimiter="\t"):
         masterlist.append(cleanrow(row))
-
-
-# In[11]:
 
 
 with open("recastreport.csv", "w", newline="") as f:
@@ -238,9 +194,6 @@ with open("recastreport.csv", "w", newline="") as f:
         for item in headers:
             line.append(str(row[item]))
         writer.writerow(line)
-
-
-# In[12]:
 
 
 countydict = OrderedDict()
@@ -256,7 +209,7 @@ for row in masterlist:
     if row['FullRace'] not in racedict:
         racedict[row['FullRace']] = OrderedDict()
         for item in ["Votes", "Precincts", "PrecinctsR"]:
-            racedict[row['FullRace']][item] = 0    
+            racedict[row['FullRace']][item] = 0
         racedict[row['FullRace']]['Counties'] = OrderedDict()
         racedict[row['FullRace']]['Candidates'] = OrderedDict()
     if row['FullName'] not in racedict[row['FullRace']]['Candidates']:
@@ -282,10 +235,6 @@ for row in masterlist:
     racedict[row['FullRace']]['Candidates'][row['FullName']]['Votes'] += row['CanVotes']
     racedict[row['FullRace']]['Counties'][row['CountyName']][row['FullName']] = row['CanVotes']
     racedict[row['FullRace']]['Votes'] += row['CanVotes']
-    
-
-
-# In[13]:
 
 
 paperdict = {}
@@ -309,31 +258,7 @@ for paper in paperdict:   # HEY!
                 if racename not in fml:
                     papergroupdict[paper][racenamegroup].append(racename)
                     fml.append(racename)
-    paperdict[paper] = fml     
-
-
-# In[14]:
-
-
-# papergroupdict
-
-
-# In[15]:
-
-
-# for race in racedict:
-#    for county in racedict[race]['Counties']:
-
-# Fuck it. Handle percentages of votes, percentage of precincts at the template level.       
-
-
-# In[16]:
-
-
-# paperdict['palmbeachpost']
-
-
-# In[17]:
+    paperdict[paper] = fml
 
 
 @app.route('/<paper>/main.html')
@@ -359,9 +284,8 @@ def maintemplate(paper):
 def getpapernames():
     global paperdict
     for paper in paperdict:
-        yield "/" + paper + "/main.html"                          
-                           
-                           
+        yield "/" + paper + "/main.html"
+
 
 # In[18]:
 
@@ -392,9 +316,6 @@ def getpapernames():
                            # countydict=countydict,
                            # timestamp=get_timestamp())
 
-                           
-                           
-
 
 if __name__ == '__main__':
     # Fire up the Flask test server
@@ -419,4 +340,3 @@ if __name__ == '__main__':
 
         app.run(debug=True, use_reloader=True, host="0.0.0.0")
         # run_simple('localhost', 5000, app)
-
