@@ -1,3 +1,10 @@
+This is an effort to download Florida election results in near-real time, and convert them into the Elex format.
+
+The original project has been split; everything that happens with the Florida data is handled by https://github.com/PalmBeachPost/election-results-parser
+
+Everything below is certainly outdated but possibly relevant so maybe it'll get cleaned up. Sometime.
+
+
 This is an effort to parse Florida election results in near-real time. At the time of initial commit, it's more of a rapid prototype than a successfully planned, well-executed bit of reliable software. Some of that will change. The state has problems providing the source data in a reliable format on time, so there's only so much we can do.
 
 The files:
