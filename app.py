@@ -50,6 +50,7 @@ import pprint
 import os
 import sys
 from subprocess import Popen
+import pickle
 
 from flask import Flask, render_template, redirect, url_for, request   # External dependency
 from flask_frozen import Freezer
@@ -59,6 +60,7 @@ from slugify import slugify, Slugify, UniqueSlugify  # awesome-slugify, from req
 primary = True
 datadir = "snapshots/"
 homedir = r'/root/data/florida-election-results'
+resultscomposite = "./resultscomposite.csv"   # Path to Final compiled CSV in Elex format, with data from all sources
 
 racedelim = " -- "    # E.g., "U.S. Senator -- Rep."
 papers = {
@@ -69,18 +71,25 @@ papers = {
     "nwf": ["Santa Rosa", "Okaloosa", "Walton"],
     "staugustine": ["St. Johns"],
     "daytonabeach": ["Volusia", "Flagler"],
-    "lakeland": ["Polk"]
+    "lakeland": ["Polk"],
+    "sarasota": ["Sarasota", "Manatee"],
+    "miami": ["Broward", "Miami-Dade", "Monroe"],
+    "bradenton": ["Manatee"]
+    
 }
 
 app = Flask(__name__)
 freezer = Freezer(app)
 pp = pprint.PrettyPrinter(indent=4)
-folders = sorted(list(glob.glob(datadir + "*")), reverse=True)  # Find the latest time-stamped folder
-folder = folders[0] + "/"
-if not os.path.exists(folder + "done"):
-    time.sleep(10)   # Try to beat a race condition
-    if not os.path.exists(folder + "done"):
-        print(quit)
+
+
+
+# folders = sorted(list(glob.glob(datadir + "*")), reverse=True)  # Find the latest time-stamped folder
+# folder = folders[0] + "/"
+# if not os.path.exists(folder + "done"):
+    # time.sleep(10)   # Try to beat a race condition
+    # if not os.path.exists(folder + "done"):
+        # print(quit)
 
 
 def get_timestamp():
@@ -122,90 +131,51 @@ def slugifier(text):
 
 
 def cleanrow(row):
-    global primary
-    global racedelim
-    for item in row:
-        row[item] = row[item].strip()     # 2016 had spaces all over the place
-    for item in ("Precincts", "PrecinctsReporting", "CanVotes"):
-        row[item] = int(row[item])    # Turn into numbers
-    partysubs = [
-        ("Republican Party", "Rep."),
-        ("Democratic Party", "Dem."),
-        ("Non-Partisan", ""),
-        ("Green Party", "Green"),
-        ("Reform Party", "Reform")
-    ]
-    row['ShortParty'] = row['PartyName']
-    for partysub in partysubs:
-        row['ShortParty'] = row['ShortParty'].replace(partysub[0], partysub[1])
-    racesubs = [
-        ("United States ", "U.S. "),
-        ("Representative in Congress, District ", "U.S. Congress, District "),
-        ("Circuit Judge, ", "Judge, "),
-        ("State Representative, District ", "State Rep., District ")
-    ]
-    racenameold = row['RaceName']  # Backup data
-    row['RaceNameOld'] = racenameold
-    for racesub in racesubs:
-        row['RaceName'] = row['RaceName'].replace(racesub[0], racesub[1])
-    racenamegroupsubs = [
-        ("Circuit Judge", "Circuit Judge"),
-        ("Representative in Congress", "U.S. Representative"),
-        ("State Representative", "State Representative"),
-        ("State Senator", "State Senator"),
-        ("United States Senator", "U.S. Senator"),
-        ("State Attorney", "State Attorney")
-    ]
-    for item in racenamegroupsubs:
-        if item[0] in racenameold:
-            racenameold = item[1]
-    row['RaceNameGroup'] = racenameold
-    if not primary:
-        row['FullRace'] = row['RaceName']
-        row['Partisan'] = 0
-    else:
-        if len(row['ShortParty']) == 0:
-            row['FullRace'] = row['RaceName']
-            row['Partisan'] = 0
-        else:
-            row['FullRace'] = row['RaceName'] + racedelim + row['ShortParty']
-            row['Partisan'] = 1
-    # if len(row['CanNameMiddle']) >6: # If this name is getting long
-        # row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameLast']])).replace("  ", " ")
-    # else:
-        # row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameMiddle'], row['CanNameLast']])).replace("  ", " ")
-    # And let's ignore up top:
-    row['FullName'] = (" ".join([row['CanNameFirst'], row['CanNameLast']])).replace("  ", " ")
     return(row)
 
 
-with open(folder + "resultsv2.txt", "r") as f:    # Import the data and do some basic cleaning
+with open(resultscomposite, "r") as f:    # Import the data and do some basic cleaning
     masterlist = []
     for row in csv.DictReader(f, delimiter="\t"):
         masterlist.append(cleanrow(row))
 
 
-with open("recastreport.csv", "w", newline="") as f:
-    headers = row.keys()
-    writer = csv.writer(f)
-    writer.writerow(headers)
-    for row in masterlist:
-        line = []
-        for item in headers:
-            line.append(str(row[item]))
-        writer.writerow(line)
+# with open("recastreport.csv", "w", newline="") as f:
+    # headers = row.keys()
+    # writer = csv.writer(f)
+    # writer.writerow(headers)
+    # for row in masterlist:
+        # line = []
+        # for item in headers:
+            # line.append(str(row[item]))
+        # writer.writerow(line)
 
 
-countydict = OrderedDict()
+# Translations:
+# countydict -> reportingdict   with reportingunitname        
+# racetracker ... was never used?
+# racedict was built around the distinct racename, but that's perilous. Let's see:
+#   -- Racedict should be done by raceid.
+#   -- Racedict then needs a key for the race name; ordinarily officename, but may include
+#       -- Party
+#       -- Seatname
+#       -- Seatnumber
+#     ... so should that be parsed here or at the intermediate level? Seems like intermediate level.
+#     because if we're grouping by raceid, then we don't care what the name is. Let's be agnostic.
+
+
+
+        
+reportingdict = OrderedDict()   # Holds reporting unit name. Or should this be holding the reporting ID?
+                                # ID 
 racedict = OrderedDict()
-racetracker = OrderedDict()
 racenamegroups = OrderedDict()
 for row in masterlist:
     # Begin basic setup
-    if row['CountyName'] not in countydict:
-        countydict[row['CountyName']] = []
-    if row['FullRace'] not in countydict[row['CountyName']]:
-        countydict[row['CountyName']].append(row['FullRace'])
+    if row['CountyName'] not in reportingdict:
+        reportingdict[row['CountyName']] = []
+    if row['FullRace'] not in reportingdict[row['CountyName']]:
+        reportingdict[row['CountyName']].append(row['FullRace'])
     if row['FullRace'] not in racedict:
         racedict[row['FullRace']] = OrderedDict()
         for item in ["Votes", "Precincts", "PrecinctsR"]:
@@ -241,9 +211,9 @@ paperdict = {}
 papergroupdict = OrderedDict()
 for paper in papers:
     paperdict[paper] = []
-    for county in countydict:
+    for county in reportingdict:
         if county in papers[paper]:
-            for fullrace in countydict[county]:
+            for fullrace in reportingdict[county]:
                 if fullrace not in paperdict[paper]:
                     paperdict[paper].append(fullrace)
 # Now we should have all the races, but the order is scrambled because there are multiple counties involved.
@@ -268,7 +238,7 @@ def maintemplate(paper):
     global paperdict
     global racedict
     global papergroupdict
-    global countydict
+    global reportingdict
     groupdict = papergroupdict[paper]
     return render_template(template,
                            DetailsWanted=False,
@@ -277,7 +247,7 @@ def maintemplate(paper):
                            racedict=racedict,
                            paperdict=paperdict,
                            paper=paper,
-                           countydict=countydict,
+                           reportingdict=reportingdict,
                            timestamp=get_timestamp())
 
 @freezer.register_generator
@@ -305,7 +275,7 @@ def getpapernames():
     # global paperdict
     # global racedict
     # global papergroupdict
-    # global countydict
+    # global reportingdict
     # groupdict = papergroupdict[paper]
     # return render_template(template,
                            # groupdict=groupdict,
@@ -313,7 +283,7 @@ def getpapernames():
                            # racedict=racedict,
                            # paperdict=paperdict,
                            # paper=paper,
-                           # countydict=countydict,
+                           # reportingdict=reportingdict,
                            # timestamp=get_timestamp())
 
 
