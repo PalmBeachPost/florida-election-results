@@ -28,8 +28,8 @@ def getResults():
             elif '(DEM)' in name:
                 name = name.replace('(DEM)', "")
                 party = 'Democrat'
-            elif '(STATS)' in name:
-                name = name.replace('(STATS)', "")
+            elif '(NON)' in name:
+                name = name.replace('(NON)', "")
                 party = 'Nonpartisan'
             name = name.strip()
             party = party.strip()
