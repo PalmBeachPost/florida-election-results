@@ -74,8 +74,8 @@ def bring_clarity(rawtime, countyname):
             except:
                 line['precinctsreportingpct'] = 0
         # For Elex-CSV, the "pct" is kept at as a decimal, not a percentage. That is, the number ranges from 0 to 1.
-        line["raceid"] = slugify("pbc " + line['officename'])
-        line["candidateid"] = slugify("-".join(["pbc", line["first"], line["last"]]))
+        line["raceid"] = slugify(countyname + " " + line['officename'])
+        line["candidateid"] = slugify("-".join([slugify(countyname), line["first"], line["last"]]))
         if line["raceid"] not in racevotes:
             racevotes[line["raceid"]] = 0
         if line["votepct"] != "0":
