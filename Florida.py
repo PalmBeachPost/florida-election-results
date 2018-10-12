@@ -69,7 +69,7 @@ headers = [
 ]
 
 
-print("Parsing " + folder)
+print("Parsing " + filepath)
 
 masterraces = OrderedDict()
 mastercandidates = OrderedDict()
@@ -137,17 +137,17 @@ for row in rows:
     votes = int(votes)
     precinctsreporting = int(precinctsreporting)
     lookups = {
-        "id": fileprefix + raceid + "-" + reportingunitid,
+        "id": "Florida " + raceid + "-" + reportingunitid,
         "raceid": raceid,
         "racetype": masterraces[raceid]['electiontype'],
         "racetypeid": masterraces[raceid]['electiontype'],
         "ballotorder": int(seqno),
-        "candidateid": fileprefix + candidateid,
+        "candidateid": "Florida " + candidateid,
         "first": masterraces[raceid]['Candidates'][candidateid]['firstname'],
         "last": masterraces[raceid]['Candidates'][candidateid]['lastname'],
         "national": "FALSE",
         "officename": masterraces[raceid]["racename"],
-        "polid": fileprefix + candidateid,
+        "polid": "Florida " + candidateid,
         "precinctsreporting": int(precinctsreporting),
         "precinctstotal": masterraces[raceid]['Counties'][reportingunitid]['Precincts'],
         "precinctsreportingpct": Decimal(precinctsreporting) / Decimal(masterraces[raceid]['Counties'][reportingunitid]['Precincts']),
@@ -169,7 +169,13 @@ for row in rows:
 # Circle back through and calculate percentage of vote
 for counter, row in enumerate(masterlist):
     # masterlist[counter][row["votepct"]] = Decimal(row['votecount']) / Decimal(votedict[row['id']])
-    masterlist[counter]["votepct"] = Decimal(row['votecount']) / Decimal(votedict[row['id']])
+    if votedict[row['id']] == 0 or votedict[row['id']] == "0":
+        masterlist[counter]["votepct"] = 0
+    else:
+        # print(row['votecount'])
+    # print(row['id'])
+    # print(votedict[row['id']])
+        masterlist[counter]["votepct"] = Decimal(row['votecount']) / Decimal(votedict[row['id']])
 
 
 partylookup = {}
