@@ -20,7 +20,9 @@ def bring_clarity(rawtime, countyname):
     snapshotsdir = configuration.snapshotsdir
     targetdir = configuration.targetdir
     filename = configuration.filename
+    electiondate = configuration.electiondate
     timestamp = datetime.datetime.strftime(rawtime, "%Y%m%d-%H%M%S")
+    lastupdated = datetime.datetime.strftime(rawtime, "%Y-%m-%dT%H:%M:%S")
     filepath = snapshotsdir + slugify(countyname) + "/" + timestamp + "/"
     targetfilename = targetdir + "70-" + slugify(countyname) + ".csv"
     os.makedirs(targetdir, exist_ok=True)
@@ -83,6 +85,11 @@ def bring_clarity(rawtime, countyname):
         if line["raceid"] not in racevotes:
             racevotes[line["raceid"]] = 0
         racevotes[line["raceid"]] += int(line["votecount"])
+        line['reportingunitid'] = countyname
+        line['id'] = slugify(line['raceid'] + " " + line['reportingunitid'])
+        line['electiondate'] = electiondate
+        line['lastupdated'] = lastupdated
+        line['level'] = "subunit"
         masterlist.append(line)
 
     for i, line in enumerate(masterlist):
