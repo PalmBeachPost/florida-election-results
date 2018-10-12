@@ -1,4 +1,4 @@
-frozen-flask
-flask
 awesome-slugify
 requests
+selenium
+beautifulsoup4pyquery
