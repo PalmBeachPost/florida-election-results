@@ -1,18 +1,52 @@
-import csv
-import glob
-from collections import OrderedDict
+import requests   # external dependency
+from slugify import slugify
+
 import os
-import time
+import datetime
+import csv
+from collections import OrderedDict
 from decimal import *
-import pprint
-pp = pprint.PrettyPrinter(indent=4)
+# import time
+# import pprint
+# pp = pprint.PrettyPrinter(indent=4)
 
-primary = True   # ... Are we ... using this?
-datadir = "snapshots/"
-getcontext().prec = 5
-fileprefix = "floridaofficial-"
+import configuration   # Local file, configuration.py, with settings
 
-WantPartiesFromCSV = True    # Do we also parse the CSV?
+rawtime = datetime.datetime.now()
+snapshotsdir = configuration.snapshotsdir
+electiondate = configuration.electiondate
+targetdir = configuration.targetdir
+timestamp = datetime.datetime.strftime(rawtime, "%Y%m%d-%H%M%S")
+filepath = snapshotsdir + "Florida/" + timestamp + "/"
+lastupdated = datetime.datetime.strftime(rawtime, "%Y-%m-%dT%H:%M:%S")
+targetfilename = targetdir + "20-Florida.csv"
+os.makedirs(targetdir, exist_ok=True)
+os.makedirs(filepath, exist_ok=True)
+getcontext().prec = 10      # Precision
+
+# We need an elexcode like 20180828 but electiondate is m/d/yyyy.
+vodka = electiondate.split("/")
+elexcode = vodka[2] + vodka[0].zfill(2) + vodka[1].zfill(2)
+
+baseurl = "http://fldoselectionfiles.elections.myflorida.com/enightfilespublic/"
+
+filetypes = [
+    ('results.txt', '_ElecResultsFL.txt'),
+    ('info.txt', '_ElecResultsFL_PipeDlm_Info.txt'),
+    ('votes.txt', '_ElecResultsFL_PipeDlm_Votes.txt'),
+]
+
+# https://fl1dos.blob.core.windows.net/enightfilespublicdev/20180828_ElecResultsFL.txt
+# http://fldoselectionfiles.elections.myflorida.com/enightfilespublic/20180828_ElecResultsFL.txt
+# http://fldoselectionfiles.elections.myflorida.com/enightfilespublic/20180828_ElecResultsFL_PipeDlm_Info.txt
+# http://fldoselectionfiles.elections.myflorida.com/enightfilespublic/20180828_ElecResultsFL_PipeDlm_Votes.txt
+
+print("Saving Florida to " + filepath)
+for filetype in filetypes:
+    local, remote = filetype
+    with open(filepath + local, "wb") as f:
+        f.write(requests.get(baseurl + elexcode + remote).content)
+print("Done downloading Florida data. Now parsing ...")
 
 """
         NEED TO BUILD FIELD DESCRIPTIONS. Asking on AP for copyright.
@@ -35,13 +69,6 @@ headers = [
 ]
 
 
-folders = sorted(list(glob.glob(datadir + "*")), reverse=True)    # Find the latest time-stamped folder
-folder = folders[0] + "/"
-if not os.path.exists(folder + "done"):
-    time.sleep(10)   # Try to beat a race condition
-    if not os.path.exists(folder + "done"):
-        print(quit)
-
 print("Parsing " + folder)
 
 masterraces = OrderedDict()
@@ -50,15 +77,15 @@ masterunits = OrderedDict()
 
 
 # Begin to parse state's "info" file that has basic race stuff distinct from votes.
-with open(folder + "info.txt", encoding="utf-8") as f:
+with open(filepath + "info.txt", "r", encoding="utf-8") as f:
     rows = f.readlines()
 for row in rows:
     row = row.strip()
     row = row[1:-1]   # Lose [] line wrappers
     if "[" in row:    # Stupid unicode fix
-        print("Faulty row with extra character: " + row)
+        print("Florida: Faulty row with extra character: " + row)
         row = str(row[row.find("[")+1:])
-        print("Fixed row: " + row)
+        print("Florida: Fixed row: " + row)
     if len(row) > 4:   # If not a blank row
         # masterinfo.append(row)   # keep a copy of everything parsed
         if row[0] == "r":    # If we have a race identifier
@@ -91,13 +118,12 @@ for row in rows:
             masterraces[raceid]['Counties'][unitid] = OrderedDict()
             masterraces[raceid]['Counties'][unitid]['Precincts'] = precincts
         else:
-            print("Found non-conforming row: " + row)
-
+            print("Florida: Found non-conforming row: " + row)
 
 # Parse candidate info at the local level, including getting vote total. Build out most of Elex format.
 masterlist = []
 votedict = {}
-with open(folder + "votes.txt", "r") as f:
+with open(filepath + "votes.txt", "r") as f:
     rows = f.readlines()
 for row in rows:
     row = row.strip()
@@ -146,23 +172,22 @@ for counter, row in enumerate(masterlist):
     masterlist[counter]["votepct"] = Decimal(row['votecount']) / Decimal(votedict[row['id']])
 
 
-if WantPartiesFromCSV:
-    partylookup = {}
-    with open(folder + "results.txt", "r") as f:
-        reader = csv.DictReader(f, delimiter="\t")
-        for row in reader:
-            key = "_".join([row['RaceName'], row['CanNameFirst'], row['CanNameLast']])
-            if key not in partylookup:
-                partylookup[key] = row['PartyName']
-    for counter, row in enumerate(masterlist):
-        key = "_".join([row['officename'], row['first'], row['last']])
+partylookup = {}
+with open(filepath + "results.txt", "r") as f:
+    reader = csv.DictReader(f, delimiter="\t")
+    for row in reader:
+        key = "_".join([row['RaceName'], row['CanNameFirst'], row['CanNameLast']])
         if key not in partylookup:
-            pass
-        else:
-            masterlist[counter]["party"] = partylookup[key]
+            partylookup[key] = row['PartyName']
+for counter, row in enumerate(masterlist):
+    key = "_".join([row['officename'], row['first'], row['last']])
+    if key not in partylookup:
+        pass
+    else:
+        masterlist[counter]["party"] = partylookup[key]
 
 
-with open(folder + "fl-elex.csv", "w", newline="") as f:
+with open(targetfilename, "w", newline="") as f:
     writer = csv.writer(f)  # Save as CSV
     writer.writerow(headers)
     for row in masterlist:
