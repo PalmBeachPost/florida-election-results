@@ -12,6 +12,7 @@ from decimal import *
 from collections import OrderedDict
 import datetime
 
+
 def bring_clarity(rawtime, countyname):
 
     # And if you're server's not in Florida's time zone, these timestamps are going to be wrong. You need to do some surgery.
@@ -54,7 +55,6 @@ def bring_clarity(rawtime, countyname):
         "num County total": "precinctstotal",
         "num County rptg": "precinctsreporting"
         }
-
 
     for row in reader:
         line = OrderedDict()

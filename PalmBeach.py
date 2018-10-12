@@ -1,5 +1,5 @@
-import requests          # External depdendency
-from slugify import slugify # External dependency
+import requests                 # External depdendencies -- run pip install -r requirements.txt
+from slugify import slugify
 
 import os
 import json
@@ -40,5 +40,5 @@ zipfilename = filepath + filename
 with open(zipfilename, "wb") as f:
     f.write(requests.get(pbczipurl).content)
 print("Zip file retrieved for " + countyname + ". Beginning to parse.")
-    
+
 clarityparser.bring_clarity(rawtime, countyname)
