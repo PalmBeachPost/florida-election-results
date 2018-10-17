@@ -51,9 +51,9 @@ def bring_clarity(rawtime, countyname):
         "party name": "party",
         "total votes": "votecount",
         "percent of votes": "votepct",
-        "ballots cast": "electtotal",
-        "num County total": "precinctstotal",
-        "num County rptg": "precinctsreporting"
+        "ballots cast": "electtotal"
+#        "num County total": "precinctstotal",
+#        "num County rptg": "precinctsreporting"
         }
 
     for row in reader:
@@ -62,7 +62,14 @@ def bring_clarity(rawtime, countyname):
             line[item] = ""
         for source in crosswalk:
             line[crosswalk[source]] = row[source]
-
+        if "num County total" in row:
+            line['precinctstotal'] = row['num County total']
+            line['precinctsreporting'] = row['num County rptg']
+        elif 'num Area total' in row:
+            line['precinctstotal'] = row['num Area total']
+            line['precinctsreporting'] = row['num Area rptg']
+        else:
+            print("Problem with " + countyname + " headers. Cannot parse! Don't know what format this is.")
         # Specific cleanups:
         peep = row['choice name'].replace('\'\'', '\'').strip()   # Replace double single quotes
         line['first'] = peep[:peep.rfind(" ")].strip()     # First name is everything until the last space

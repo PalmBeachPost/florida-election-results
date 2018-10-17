@@ -1,7 +1,7 @@
 import os
 from multiprocessing import Pool
 
-processes = ("Florida.py", "PalmBeach.py")
+processes = ("Florida.py", "PalmBeach.py", "Miami-Dade.py")
 
 def run_process(process):
     os.system('python {}'.format(process))
