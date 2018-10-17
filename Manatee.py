@@ -5,7 +5,18 @@ import re
 import time
 import csv
 import html5lib
+import os
+import os.path
+import datetime
+from slugify import slugify
+import configuration   # Local file, configuration.py, with settings
+import clarityparser    # Local file, clarityparser.py
 
+countyname = "Manatee"    # Critical to have this!
+rawtime = datetime.datetime.now()
+snapshotsdir = configuration.snapshotsdir
+timestamp = datetime.datetime.strftime(rawtime, "%Y%m%d-%H%M%S")
+filepath = snapshotsdir + (countyname) + "/" + timestamp + "/"
 raceResults = []
 def getResults():
 
@@ -63,10 +74,10 @@ getResults()
 
 def saveToCSV(raceResults):
     global driver
-    #give the csv file you want to export it to a name
-    filename = 'ManateeRaceResults.csv'
+    os.makedirs(filepath, exist_ok=True)
+    filename = countyname+ ".csv"
     #open your new csv file with a 'w' so you can write to it
-    with open(filename, 'w') as output_file:
+    with open(filepath+filename, 'w') as output_file:
         #make headers for you columns. these must match up with the keys you set in your python dictionary, inamte
         fieldnames = [
                     'officename',
