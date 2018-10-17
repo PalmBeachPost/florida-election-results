@@ -176,6 +176,7 @@ for counter, row in enumerate(masterlist):
     # print(row['id'])
     # print(votedict[row['id']])
         masterlist[counter]["votepct"] = Decimal(row['votecount']) / Decimal(votedict[row['id']])
+        masterlist[counter]["electtotal"] = votedict[row["id"]]
 
 
 partylookup = {}
