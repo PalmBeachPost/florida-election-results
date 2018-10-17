@@ -1,13 +1,15 @@
-#Manatee does not report provisional ballots 
-from urllib import urlopen
+#Manatee does not report provisional ballots
+import urllib.request
 from bs4 import BeautifulSoup
 import re
 import time
 import csv
+import html5lib
+
 raceResults = []
 def getResults():
 
-    html = urlopen("https://enr.electionsfl.org/MAN/Summary/1889/")
+    html = urllib.request.urlopen("https://enr.electionsfl.org/MAN/Summary/1889/")
     bsObj = BeautifulSoup(html, "html5lib")
     #find all of the races
     resultsSection = bsObj.findAll("div", {"class":"Race row"})
@@ -24,14 +26,16 @@ def getResults():
             name = (name.get_text())
             if '(REP)' in name:
                 name = name.replace('(REP)', "")
-                party = 'Republican'
+                party = 'Republican Party'
             elif '(DEM)' in name:
                 name = name.replace('(DEM)', "")
-                party = 'Democrat'
+                party = 'Democratic Party'
             elif '(NON)' in name:
                 name = name.replace('(NON)', "")
                 party = 'Nonpartisan'
-            name = name.strip()
+            name = name.strip().split()
+            first = name[0]
+            last = name[-1]
             party = party.strip()
             electionDayVotes = tr.find("td", {"class":"DetailResultsColumn notranslate PollingVotes"})
             voteByMail = tr.find("td", {"class":"DetailResultsColumn notranslate MailVotes"})
@@ -39,16 +43,20 @@ def getResults():
             totalVotes = tr.find("td", {"class":"DetailResultsColumn notranslate TotalVotes"})
             percentOfVotes = tr.find("td", {"class":"DetailResultsColumn notranslate"})
             raceResult = {
-                'raceName': raceName.get_text().strip(),
-                'candidateName': name,
+                'officename': raceName.get_text().strip(),
+                'first': first,
+                'last': last,
                 'party': party,
-                'precinctsReporting': precinctsReporting.get_text().strip(),
-                'precinctsParticipating': precinctsParticipating.get_text().strip(),
+                'precinctsreporting': precinctsReporting.get_text().strip(),
+                'precinctstotal': precinctsParticipating.get_text().strip(),
                 'electionDayVotes': electionDayVotes.get_text().replace(",", "").strip(),
                 'voteByMail': voteByMail.get_text().replace(",", "").strip(),
                 'earlyVotes': earlyVotes.get_text().replace(",", "").strip(),
-                'totalVotes': totalVotes.get_text().replace(",", "").strip(),
-                'percentOfVotes': percentOfVotes.get_text().replace("%", "").strip(),
+                'votecount': totalVotes.get_text().replace(",", "").strip(),
+                'votepct': percentOfVotes.get_text().replace("%", "").strip(),
+                'reportingunitname': "Manatee",
+                'statename': 'Florida',
+                'statepostal': 'FL',
             }
             raceResults.append(raceResult)
 getResults()
@@ -61,16 +69,20 @@ def saveToCSV(raceResults):
     with open(filename, 'w') as output_file:
         #make headers for you columns. these must match up with the keys you set in your python dictionary, inamte
         fieldnames = [
-                    'raceName',
-                    'candidateName',
+                    'officename',
+                    'first',
+                    'last',
                     'party',
-                    'precinctsReporting',
-                    'precinctsParticipating',
+                    'precinctsreporting',
+                    'precinctstotal',
                     'electionDayVotes',
                     'voteByMail',
                     'earlyVotes',
-                    'totalVotes',
-                    'percentOfVotes',
+                    'votecount',
+                    'votepct',
+                    'reportingunitname',
+                    'statename',
+                    'statepostal',
                      ]
         #write these into a csv, the headers being fieldnames and the rows your list of inmates
         writer = csv.DictWriter(output_file, fieldnames=fieldnames)
