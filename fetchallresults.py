@@ -1,3 +1,5 @@
+# Sample file for The Palm Beach Post and related papers. Tweak as you will.
+
 import os
 from multiprocessing import Pool
 
