@@ -159,7 +159,7 @@ for row in rows:
         line[key] = lookups[key]
     racename = masterraces[raceid]["racename"]
     line['officename'] = racename.split(",")[0].strip()
-    line['seatname'] = racename.split(",")[1:].strip()
+    line['seatname'] = ", ".join(racename.split(",")[1:]).strip()
     racetype = line['racetype']
     if racetype == "Republican Primary":
         line['racetypeid'] = "R"
