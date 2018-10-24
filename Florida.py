@@ -140,13 +140,11 @@ for row in rows:
         "id": "Florida " + raceid + "-" + reportingunitid,
         "raceid": raceid,
         "racetype": masterraces[raceid]['electiontype'],
-        "racetypeid": masterraces[raceid]['electiontype'],
         "ballotorder": int(seqno),
         "candidateid": "Florida " + candidateid,
         "first": masterraces[raceid]['Candidates'][candidateid]['firstname'],
         "last": masterraces[raceid]['Candidates'][candidateid]['lastname'],
         "national": "FALSE",
-        "officename": masterraces[raceid]["racename"],
         "polid": "Florida " + candidateid,
         "precinctsreporting": int(precinctsreporting),
         "precinctstotal": masterraces[raceid]['Counties'][reportingunitid]['Precincts'],
@@ -159,6 +157,14 @@ for row in rows:
     }
     for key in lookups:
         line[key] = lookups[key]
+    racename = masterraces[raceid]["racename"]
+    line['officename'] = racename.split(",")[0].strip()
+    line['seatname'] = racename.split(",")[1:].strip()
+    racetype = line['racetype']
+    if racetype == "Republican Primary":
+        line['racetypeid'] = "R"
+    elif racetype == "Democratic Primary":
+        line['racetypeid'] = "D"
     if line["id"] not in votedict:
         votedict[line["id"]] = 0
     votedict[line["id"]] += votes
@@ -172,12 +178,8 @@ for counter, row in enumerate(masterlist):
     if votedict[row['id']] == 0 or votedict[row['id']] == "0":
         masterlist[counter]["votepct"] = 0
     else:
-        # print(row['votecount'])
-    # print(row['id'])
-    # print(votedict[row['id']])
         masterlist[counter]["votepct"] = Decimal(row['votecount']) / Decimal(votedict[row['id']])
         masterlist[counter]["electtotal"] = votedict[row["id"]]
-
 
 partylookup = {}
 with open(filepath + "results.txt", "r") as f:
