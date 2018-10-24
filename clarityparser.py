@@ -47,13 +47,10 @@ def bring_clarity(rawtime, countyname):
     racevotes = {}
     crosswalk = {
         "line number": "ballotorder",
-        "contest name": "officename",
         "party name": "party",
         "total votes": "votecount",
         "percent of votes": "votepct",
         "ballots cast": "electtotal"
-#        "num County total": "precinctstotal",
-#        "num County rptg": "precinctsreporting"
         }
 
     for row in reader:
@@ -83,7 +80,20 @@ def bring_clarity(rawtime, countyname):
             except:
                 line['precinctsreportingpct'] = 0
         # For Elex-CSV, the "pct" is kept at as a decimal, not a percentage. That is, the number ranges from 0 to 1.
-        line["raceid"] = slugify(countyname + " " + line['officename'])
+        contestname = row["contest name"]
+        line['officename'] = contestname.split(",")[0].strip()
+        line['seatname'] = ", ".join(contestname.split(",")[1:]).strip().replace("  ", " ")
+        
+        # Do we try to handle partisan races here separately, or let whatever the ID is carry through to the seat?
+        # Palm Beach, naturally, messes with us.
+        if line['officename'][0:6] in ["REP - ", "DEM - "]:
+            print("Slicing around " + line['officename'])
+            if line['party'] == "":
+                line['party'] = line['officename'][:3]
+            line['seatname'] += " - " + line['officename'][:3]
+            line['officename'] = line['officename'][6:]
+            print(line['officename'] + " ... " + line['seatname'])
+        line["raceid"] = slugify(countyname + " " + contestname)   # Keep district number, etc.
         line["candidateid"] = slugify("-".join([slugify(countyname), line["first"], line["last"]]))
         if line["raceid"] not in racevotes:
             racevotes[line["raceid"]] = 0
