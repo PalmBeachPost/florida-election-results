@@ -19,7 +19,7 @@ pbcbaseurl = "https://results.enr.clarityelections.com/FL/Palm_Beach/"
 zipsuffix = "/reports/summary.zip"
 
 pbcjson = json.loads(requests.get(pbcbaseurl + "elections.json").content)
-electionid = pbcjson[0]['EID']
+electionid = pbcjson[1]['EID']
 html = requests.get(pbcbaseurl + electionid).content
 
 # print(pq(html))
@@ -31,7 +31,7 @@ html = requests.get(pbcbaseurl + electionid).content
 # You know what would make this more impressively hard to maintain? Let's take Javascript embedded into HTML
 # and parse it with a string function. Take the stuff between the first and second slashes ...
 
-magicnumber = str(html).split("/")[1]
+magicnumber = str(html).split("/")[0]   # Take the newest election
 pbczipurl = pbcbaseurl + electionid + "/" + magicnumber + zipsuffix
 
 print("Saving to " + filepath)
