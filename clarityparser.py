@@ -69,8 +69,12 @@ def bring_clarity(rawtime, countyname):
             print("Problem with " + countyname + " headers. Cannot parse! Don't know what format this is.")
         # Specific cleanups:
         peep = row['choice name'].replace('\'\'', '\'').strip()   # Replace double single quotes
-        line['first'] = peep[:peep.rfind(" ")].strip()     # First name is everything until the last space
-        line['last'] = peep[peep.rfind(" "):].strip()      # Last name is everything after the last space
+        if " " not in peep:          # Handle single-word candidates like "YES"
+            line['first'] = peep
+            line['last'] = ""
+        else:
+            line['first'] = peep[:peep.rfind(" ")].strip()     # First name is everything until the last space
+            line['last'] = peep[peep.rfind(" "):].strip()      # Last name is everything after the last space
         precinctstotal = line["precinctstotal"]
         if precinctstotal == "0" or precinctstotal == "":
             line['precinctsreportingpct'] = 0
@@ -94,7 +98,9 @@ def bring_clarity(rawtime, countyname):
             line['officename'] = line['officename'][6:]
             print(line['officename'] + " ... " + line['seatname'])
         line["raceid"] = slugify(countyname + " " + contestname)   # Keep district number, etc.
-        line["candidateid"] = slugify("-".join([slugify(countyname), line["first"], line["last"]]))
+        line["candidateid"] = slugify("-".join([line['raceid'], line["first"], line["last"]]))
+        if line['party'] in ['DEM', 'REP']:
+            line['racetypeid'] = line['party'][0]   # D or R to indicate primary. 
         if line["raceid"] not in racevotes:
             racevotes[line["raceid"]] = 0
         if line["votepct"] != "0":
