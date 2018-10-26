@@ -135,41 +135,44 @@ for row in rows:
     for item in headers:
         line[item] = ""
     votes = int(votes)
-    precinctsreporting = int(precinctsreporting)
-    lookups = {
-        "id": "Florida " + raceid + "-" + reportingunitid,
-        "raceid": raceid,
-        "racetype": masterraces[raceid]['electiontype'],
-        "ballotorder": int(seqno),
-        "candidateid": "Florida " + candidateid,
-        "first": masterraces[raceid]['Candidates'][candidateid]['firstname'],
-        "last": masterraces[raceid]['Candidates'][candidateid]['lastname'],
-        "national": "FALSE",
-        "polid": "Florida " + candidateid,
-        "precinctsreporting": int(precinctsreporting),
-        "precinctstotal": masterraces[raceid]['Counties'][reportingunitid]['Precincts'],
-        "precinctsreportingpct": Decimal(precinctsreporting) / Decimal(masterraces[raceid]['Counties'][reportingunitid]['Precincts']),
-        "reportingunitid": reportingunitid,
-        "reportingunitname": masterunits[reportingunitid],
-        "statename": "Florida",
-        "statepostal": "FL",
-        "votecount": int(votes)
-    }
-    for key in lookups:
-        line[key] = lookups[key]
-    racename = masterraces[raceid]["racename"]
-    line['officename'] = racename.split(",")[0].strip()
-    line['seatname'] = ", ".join(racename.split(",")[1:]).strip().replace("  ", " ")
-    racetype = line['racetype']
-    if racetype == "Republican Primary":
-        line['racetypeid'] = "R"
-    elif racetype == "Democratic Primary":
-        line['racetypeid'] = "D"
-    if line["id"] not in votedict:
-        votedict[line["id"]] = 0
-    votedict[line["id"]] += votes
-    # print(line)
-    masterlist.append(line)
+    if raceid not in masterraces:
+        print("Race not found in dictionary: " + row)
+    else:
+        precinctsreporting = int(precinctsreporting)
+        lookups = {
+            "id": "Florida " + raceid + "-" + reportingunitid,
+            "raceid": raceid,
+            "racetype": masterraces[raceid]['electiontype'],
+            "ballotorder": int(seqno),
+            "candidateid": "Florida " + candidateid,
+            "first": masterraces[raceid]['Candidates'][candidateid]['firstname'],
+            "last": masterraces[raceid]['Candidates'][candidateid]['lastname'],
+            "national": "FALSE",
+            "polid": "Florida " + candidateid,
+            "precinctsreporting": int(precinctsreporting),
+            "precinctstotal": masterraces[raceid]['Counties'][reportingunitid]['Precincts'],
+            "precinctsreportingpct": Decimal(precinctsreporting) / Decimal(masterraces[raceid]['Counties'][reportingunitid]['Precincts']),
+            "reportingunitid": reportingunitid,
+            "reportingunitname": masterunits[reportingunitid],
+            "statename": "Florida",
+            "statepostal": "FL",
+            "votecount": int(votes)
+        }
+        for key in lookups:
+            line[key] = lookups[key]
+        racename = masterraces[raceid]["racename"]
+        line['officename'] = racename.split(",")[0].strip()
+        line['seatname'] = ", ".join(racename.split(",")[1:]).strip().replace("  ", " ")
+        racetype = line['racetype']
+        if racetype == "Republican Primary":
+            line['racetypeid'] = "R"
+        elif racetype == "Democratic Primary":
+            line['racetypeid'] = "D"
+        if line["id"] not in votedict:
+            votedict[line["id"]] = 0
+        votedict[line["id"]] += votes
+        # print(line)
+        masterlist.append(line)
 
 
 # Circle back through and calculate percentage of vote
