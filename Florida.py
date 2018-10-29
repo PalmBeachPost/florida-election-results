@@ -163,6 +163,7 @@ for row in rows:
         racename = masterraces[raceid]["racename"]
         line['officename'] = racename.split(",")[0].strip()
         line['seatname'] = ", ".join(racename.split(",")[1:]).strip().replace("  ", " ")
+        line['lastupdated'] = lastupdated
         racetype = line['racetype']
         if racetype == "Republican Primary":
             line['racetypeid'] = "R"
