@@ -1,5 +1,6 @@
 import requests                 # External depdendencies -- run pip install -r requirements.txt
 from slugify import slugify
+# from pyquery import PyQuery as pq
 
 import os
 import json
@@ -19,22 +20,22 @@ pbcbaseurl = "https://results.enr.clarityelections.com/FL/Palm_Beach/"
 zipsuffix = "/reports/summary.zip"
 
 pbcjson = json.loads(requests.get(pbcbaseurl + "elections.json").content)
-electionid = pbcjson[1]['EID']
+electionid = pbcjson[0]['EID']
 html = requests.get(pbcbaseurl + electionid).content
 
 # print(pq(html))
 # <html><head>
-# <script src="./210408/js/version.js" type="text/javascript"/>
-# <script type="text/javascript">TemplateRedirect("summary.html","./210408", "", "");</script>
-# </head></html>
+                                # <script src="./214792/js/version.js" type="text/javascript"/>
+                                # <script type="text/javascript">TemplateRedirect("summary.html","./214792", "", "");</script>
+                                # </head></html>
 #
 # You know what would make this more impressively hard to maintain? Let's take Javascript embedded into HTML
 # and parse it with a string function. Take the stuff between the first and second slashes ...
 
-magicnumber = str(html).split("/")[0]   # Take the newest election
+magicnumber = str(html).split("/")[1]   # Take the newest election
 pbczipurl = pbcbaseurl + electionid + "/" + magicnumber + zipsuffix
 
-print("Saving to " + filepath)
+print("Saving " + pbczipurl + " to " + filepath)
 os.makedirs(filepath, exist_ok=True)
 zipfilename = filepath + filename
 with open(zipfilename, "wb") as f:
