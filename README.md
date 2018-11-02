@@ -1,25 +1,15 @@
-This is an effort to download Florida election results in near-real time, and convert them into the Elex format.
+This is an effort to download Florida election results in near-real time, and convert them into the *Elex-CSV* format.
 
 The original project has been split; everything that happens with the Florida data is handled by https://github.com/PalmBeachPost/election-results-parser
 
-Everything below is certainly outdated but possibly relevant so maybe it'll get cleaned up. Sometime.
+Any code that works or reads well should be credited to [Caitlin Ostroff](https://github.com/ceostroff). Any code that fails or is profane should be blamed on [Mike Stucka](https://github.com/stucka).
 
+An orientation:
+[Elex](https://github.com/newsdev/elex) is a program originally created by The New York Times and National Public Radio to parse Associated Press election result data into two formats, called here, for argument's sake, *Elex-CSV* and *Elex-JSON*. Those formats host just about everything you'd need for a print or web presentation of election results. There are differences between the formats; see documentation inside [election-results-parser](https://github.com/PalmBeachPost/election-results-parser) for more.
 
-This is an effort to parse Florida election results in near-real time. At the time of initial commit, it's more of a rapid prototype than a successfully planned, well-executed bit of reliable software. Some of that will change. The state has problems providing the source data in a reliable format on time, so there's only so much we can do.
-
-The files:
-<ul>
-<li>getdata.bat/getresults.sh: Windows and Linux scripts to call the other stuff:
-<li>resultsdownloader.py: From the Florida secretary of state's office, download the two pipe-delimited files and one CSV file. At the time of writing, also download results files for Palm Beach County.
-<li> pipetocsv.py: A very hastily written file to take the pipe-delimited files, rework the data, and transform them into the CSV-style format. (Not all the same data is available; it's missing at least middle names and party.)
-<li> app.py:
-<ul>
-<li>Import one of the CSVs.
-<li>Build usable data structures.
-<li>Pass those data structures off to Flask
-<li>Use Flask to build HTML from templates for each media outlet specified near the top of app.py.
-<li>Use Frozen Flask to save them as static HTML ("bake them out")
-</ul>
-<li> postbake.sh: Do stuff with baked-out files, like move them to where the web server can see 'em
-<li> requirements.txt: You want to run "pip install -r requirements.txt" to get the basic software working. You really should be using virtualenv or similar so you don't bork up something else, and it doesn't bork up anything for you.
-</ul>
+That results parser is built to take the output from these Florida scrapers and others, by relying on the Elex format as a standard. In this package:
+<li> configuration.py -- Some basic stuff. Alter this before each election.
+<li>Florida.py -- main scraper for Florida results. Florida puts out two pipe-delimited files for each election and one tab-delimited file, which contain different information and may be updated at different times on election night. The Florida parser tries to grab the stuff that actually was updated early for the August 2018 primary, and then folds in party information from the other file.
+<li>Miami-Dade.py, PalmBeach.py, Sarasota.py, Broward.py, Manatee.py -- Scrapers that may or may not be fully automated and built out. Many Florida counties use different versions of the same software, which outputs in two different file formats.
+<li>clarityparser.py -- Parser for most of the county scrapers. Converts zipped data file into Elex-CSV format.
+<li>runeverything.py -- Example of how to run multiple scrapers in parallel to reduce waiting time. This program became the basis of something in the election-results-parser package that runs the scrapers, handles a bunch more processing, and generates web pages and reports. Your workflow may vary.
