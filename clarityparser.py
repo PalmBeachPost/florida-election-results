@@ -113,6 +113,7 @@ def bring_clarity(rawtime, countyname):
         line['electiondate'] = electiondate
         line['lastupdated'] = lastupdated
         line['level'] = "subunit"
+        line['reportingunitname'] = countyname
         masterlist.append(line)
 
     for i, line in enumerate(masterlist):
