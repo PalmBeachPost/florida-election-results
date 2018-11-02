@@ -193,7 +193,10 @@ with open(filepath + "results.txt", "r") as f:
         if key not in partylookup:
             partylookup[key] = row['PartyName']
 for counter, row in enumerate(masterlist):
-    key = "_".join([row['officename'], row['first'], row['last']])
+    racethingy = row['officename']
+    if len(row['seatname']) > 0:
+        racethingy += ", " + row['seatname']
+    key = "_".join([racethingy, row['first'], row['last']])        
     if key not in partylookup:
         pass
     else:
