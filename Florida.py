@@ -181,6 +181,7 @@ for counter, row in enumerate(masterlist):
     # masterlist[counter][row["votepct"]] = Decimal(row['votecount']) / Decimal(votedict[row['id']])
     if votedict[row['id']] == 0 or votedict[row['id']] == "0":
         masterlist[counter]["votepct"] = 0
+        masterlist[counter]["electtotal"] = 0
     else:
         masterlist[counter]["votepct"] = Decimal(row['votecount']) / Decimal(votedict[row['id']])
         masterlist[counter]["electtotal"] = votedict[row["id"]]
