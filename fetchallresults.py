@@ -12,3 +12,4 @@ def run_process(process):
 if __name__ ==  '__main__':
     pool = Pool(processes=8)
     pool.map(run_process, processes)
+    pool.close()
