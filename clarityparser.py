@@ -65,6 +65,9 @@ def bring_clarity(rawtime, countyname):
         elif 'num Area total' in row:
             line['precinctstotal'] = row['num Area total']
             line['precinctsreporting'] = row['num Area rptg']
+        elif 'num Precinct total' in row:
+            line['precinctstotal'] = row['num Precinct total']
+            line['precinctsreporting'] = row['num Precinct rptg']
         else:
             print("Problem with " + countyname + " headers. Cannot parse! Don't know what format this is.")
         # Specific cleanups:
