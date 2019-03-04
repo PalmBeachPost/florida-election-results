@@ -69,7 +69,7 @@ def bring_clarity(rawtime, countyname):
             line['precinctstotal'] = row['num Precinct total']
             line['precinctsreporting'] = row['num Precinct rptg']
         else:
-            print("Problem with " + countyname + " headers. Cannot parse! Don't know what format this is.")
+            print(f"Problem with {countyname} headers. Cannot parse! Don't know what format this is.")
         # Specific cleanups:
         peep = row['choice name'].replace('\'\'', '\'').strip()   # Replace double single quotes
         if " " not in peep:          # Handle single-word candidates like "YES"
@@ -94,7 +94,7 @@ def bring_clarity(rawtime, countyname):
         # Do we try to handle partisan races here separately, or let whatever the ID is carry through to the seat?
         # Palm Beach, naturally, messes with us.
         if line['officename'][0:6] in ["REP - ", "DEM - "]:
-            print("Slicing around " + line['officename'])
+            print(f"Slicing around {line['officename']}")
             if line['party'] == "":
                 line['party'] = line['officename'][:3]
             line['seatname'] += " - " + line['officename'][:3]
@@ -127,4 +127,4 @@ def bring_clarity(rawtime, countyname):
         writer.writerow(lineheaders)
         for row in masterlist:
             writer.writerow(list(row.values()))
-    print("Done parsing out " + countyname)
+    print(f"Done parsing out {countyname} to {targetfilename}")
