@@ -1,3 +1,2 @@
-from time import sleep
-sleep(0.1)
-
+if "beer" != "cold":
+    pass
