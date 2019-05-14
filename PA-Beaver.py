@@ -6,13 +6,31 @@ import re
 from collections import OrderedDict
 import datetime
 from decimal import *
+import os
+
+import configuration    # Local file
 
 # with open("2019.html", "r") as f:
 #     html = f.readlines()
 
 sourceurl = "http://www.beavercountypa.gov/Depts/Elections/Documents/2019_Results_by_Precinct_EL30.HTM"
-html = requests.get(sourceurl).content
-targetfilename = "PA-Beaver.csv"
+rawtime = datetime.datetime.now()
+snapshotsdir = configuration.snapshotsdir
+filename = "PA-Beaver.html"
+timestamp = datetime.datetime.strftime(rawtime, "%Y%m%d-%H%M%S")
+filepath = snapshotsdir + "/" + timestamp + "/"
+targetdir = configuration.targetdir
+
+targetfilename = "70-PA-Beaver.csv"
+
+os.makedirs(filepath, exist_ok=True)
+
+# Download and save the raw file
+with open(filepath + filename, "wb") as f:
+    f.write(requests.get(sourceurl).content)
+with open(filepath + filename, "r") as f:
+    html = f.readlines()
+
 
 lineheaders = ["id", "raceid", "racetype", "racetypeid", "ballotorder", "candidateid", "description",
                "delegatecount", "electiondate", "electtotal", "electwon", "fipscode", "first", "incumbent",
