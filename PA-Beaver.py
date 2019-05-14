@@ -217,9 +217,13 @@ for i, line in enumerate(masterlist):
             masterlist[i]['votepct'] = Decimal(masterlist[0]['votecount'])/Decimal(masterlist[i]['electtotal'])
             # For Elex-CSV, the "pct" is kept at as a decimal, not a percentage. That is, the number ranges from 0 to 1.
 
-with open(targetfilename, "w", newline="") as f:
-    writer = csv.writer(f)
-    writer.writerow(lineheaders)
-    for row in masterlist:
-        writer.writerow(list(row.values()))
+# We want to save a snapshot, but we also want to save to the directory where we'll be pulling from
+tempfilenames = [filepath + targetfilename, targetdir + targetfilename]
+
+for tempfilename in tempfilenames:
+    with open(tempfilename, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(lineheaders)
+        for row in masterlist:
+            writer.writerow(list(row.values()))
 print(f"Done parsing out PA-Beaver with {len(masterlist)} entries.")
