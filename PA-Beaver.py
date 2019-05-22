@@ -45,7 +45,7 @@ lastupdated = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%dT%H:%
 
 precincts = []
 precinctrows = None
-for row in html[7:-1]:  # Strip off pre and HTML tags
+for row in html[3:-2]:  # Strip off pre and HTML tags
     if "PRECINCT REPORT" in row:
         if not precinctrows:    # If we're making our very first pass, we have no precinct info to add to.
             precinctrows = []
