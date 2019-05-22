@@ -28,12 +28,12 @@ os.makedirs(filepath, exist_ok=True)
 
 kludge = {
     "Aliquippa School": ["Repic", "Gilbert"],
-    "Aliquippa Council": ["Milliner", "West"],
+    "Council Aliquippa": ["Milliner", "West"],
     "Blackhawk School": ["Heckathorn"],
     "Freedom Area": ["Geibel", "Sherman"],
     "Harmony Twp": ["Mosura"],
-    "South Side School": ["Stewart", "Allison"],
-    "Council Midland": ["Noto", Drozdjibob"],
+    "Southside School": ["Stewart", "Allison"],
+    "Council Midland": ["Noto", "Drozdjibob"],
     "Raccoon Twp": ["Marshall"]
     }
 
@@ -200,7 +200,7 @@ for precinct in precincts[0:]:
                     if kludgeoffice in line['officename']:
                         for kludgepeep in kludge[kludgeoffice]:
                             if kludgepeep in peep:
-                                line['officename'] = line['officename'] + " (two years)
+                                line['officename'] = line['officename'] + " (two years)"
                 if " " not in peep:          # Handle single-word candidates like "YES"
                     line['first'] = peep
                     line['last'] = ""
