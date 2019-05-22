@@ -26,6 +26,17 @@ targetfilename = "70-PA-Beaver.csv"
 
 os.makedirs(filepath, exist_ok=True)
 
+kludge = {
+    "Aliquippa School": ["Repic", "Gilbert"],
+    "Aliquippa Council": ["Milliner", "West"],
+    "Blackhawk School": ["Heckathorn"],
+    "Freedom Area": ["Geibel", "Sherman"],
+    "Harmony Twp": ["Mosura"],
+    "South Side School": ["Stewart", "Allison"],
+    "Council Midland": ["Noto", Drozdjibob"],
+    "Raccoon Twp": ["Marshall"]
+    }
+
 # Download and save the raw file
 with open(filepath + filename, "wb") as f:
     f.write(requests.get(sourceurl).content)
@@ -184,6 +195,12 @@ for precinct in precincts[0:]:
                 line['precinctsreportingpct'] = precinctsreporting
                 line['reportingunitid'] = "PA-Beaver County-" + precinctid
                 line['reportingunitname'] = precinctid
+                line['officename'] = contestname.split(",")[0].strip()
+                for kludgeoffice in kludge:
+                    if kludgeoffice in line['officename']:
+                        for kludgepeep in kludge[kludgeoffice]:
+                            if kludgepeep in peep:
+                                line['officename'] = line['officename'] + " (two years)
                 if " " not in peep:          # Handle single-word candidates like "YES"
                     line['first'] = peep
                     line['last'] = ""
@@ -191,7 +208,7 @@ for precinct in precincts[0:]:
                     line['first'] = peep[:peep.rfind(" ")].strip()     # First name is everything until the last space
                     line['last'] = peep[peep.rfind(" "):].strip()      # Last name is everything after the last space
                 contestname = contestname
-                line['officename'] = contestname.split(",")[0].strip()
+
                 line['seatname'] = ", ".join(contestname.split(",")[1:]).strip().replace("  ", " ")
                 if len(raceparty) > 0:
                     line['seatname'] = line['seatname'] + racepartytag
