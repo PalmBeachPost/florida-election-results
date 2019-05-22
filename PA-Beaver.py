@@ -13,7 +13,8 @@ import configuration    # Local file
 # with open("2019.html", "r") as f:
 #     html = f.readlines()
 
-sourceurl = "http://www.beavercountypa.gov/Depts/Elections/Documents/2019_Results_by_Precinct_EL30.HTM"
+# sourceurl = "http://www.beavercountypa.gov/Depts/Elections/Documents/ElectionNightResults/2019_Results_by_Precinct_EL30.htm"
+sourceurl = "http://www.beavercountypa.gov/Depts/Elections/Documents/ElectionNightResults/2019_Results_by_Precinct_EL30.htm"
 rawtime = datetime.datetime.now()
 snapshotsdir = configuration.snapshotsdir
 filename = "PA-Beaver.html"
@@ -44,7 +45,7 @@ lastupdated = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%dT%H:%
 
 precincts = []
 precinctrows = None
-for row in html[3:-2]:  # Strip off pre and HTML tags
+for row in html[7:-1]:  # Strip off pre and HTML tags
     if "PRECINCT REPORT" in row:
         if not precinctrows:    # If we're making our very first pass, we have no precinct info to add to.
             precinctrows = []
@@ -52,6 +53,7 @@ for row in html[3:-2]:  # Strip off pre and HTML tags
             precincts.append(precinctrows)   # When we have a complete precinct, add it in.
             precinctrows = []
     row = row.rstrip()
+    
     precinctrows.append(row)
 precincts.append(precinctrows)  # Make sure you add in the last one!
 
