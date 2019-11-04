@@ -1,15 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[3]:
-
-
 from slugify import slugify    # External dependency. See requirements.txt
 import pysftp
 import paramiko
 
 import configuration        # Local configuration file configuration.py
-exec(open("./OH-Franklin-creds.py").read())     # Local config file just for this
 
 from collections import OrderedDict
 import csv
@@ -18,32 +11,17 @@ import datetime
 from decimal import *
 import subprocess
 
-
-# In[4]:
+exec(open("./OH-Franklin-creds.py").read())     # Local config file just for this
 
 
 """
 To-do:
 
-Download via SFTP with password stored secretly in other file
-Save into snapshotsdir
-Output to elex-CSV format
 Put into run-everything script
-Build Sheet from interim CSV
-
 
 """
 
-
-# In[5]:
-
-
 sourcefilename = "19GOHFRA.ASC"
-
-
-# In[6]:
-
-
 countyname = "OH-Franklin"
 rawtime = datetime.datetime.now()
 snapshotsdir = configuration.snapshotsdir
@@ -58,15 +36,9 @@ os.makedirs(targetdir, exist_ok=True)
 os.makedirs(filepath, exist_ok=True)
 
 
-# In[7]:
-
-
 hostname = creds['hostname']
 password = creds['password']
 username = creds['username']
-
-
-# In[13]:
 
 
 # First attempt was to try to get with psftpfu
@@ -87,16 +59,13 @@ username = creds['username']
 #     remotefiles = sftp.listdir(".")
 
 
-# In[ ]:
-
-
 # paramiko.Transport._preferred_kex = ('diffie-hellman-group-exchange-sha256',
 #                                     'diffie-hellman-group14-sha256',
 #                                     'diffie-hellman-group-exchange-sha1',
 #                                     'diffie-hellman-group14-sha1',
 #                                     'diffie-hellman-group1-sha1')
 #
-# 
+#
 
 # transport = paramiko.Transport((hostname))
 # transport.connect(None,username=username,password=password)
@@ -110,19 +79,11 @@ username = creds['username']
 # It also doesn't support pscp's file listing effort.
 # So ... we have to get the thing each run, yes? We can't confirm whether a file is newer or older.
 
-
-# In[12]:
-
-
 fulltarget = f"{filepath}{sourcefilename}"
 print("Attempting to download file")
 command = f"pscp -l {username} -pw {password} {hostname}:{sourcefilename} {fulltarget}"
 subprocess.run(command.split(), stdout=subprocess.DEVNULL)
 print("Attempt done")
-
-
-# In[ ]:
-
 
 # Let's keep "Write-in" here, but flag per tradition to drop in middleware.
 
@@ -134,16 +95,8 @@ candidatesunwanted = [
     "OVER VOTES"
 ]
 
-
-# In[ ]:
-
-
 with open(fulltarget, "r") as f:
     rows = f.readlines()
-
-
-# In[ ]:
-
 
 # Preview your column widths easier with regex101.com -- makes it so much easier
 
@@ -151,7 +104,7 @@ headers = OrderedDict([
     ("contestnumber", 4),
     ("candidatenumber", 3),
     ("precinctcode", 4),
-    #("registeredvoterscount", 6),
+    # ("registeredvoterscount", 6),
     ("totalvotes", 6),
     ("votesgroup1abspaper", 6),
     ("votesgroup2absivo", 6),
@@ -169,28 +122,21 @@ headers = OrderedDict([
     ("referendum", 1)
     ])
 
-myregex = ""
-for item in headers:
-    myregex += "(.{" + str(headers[item]) + "})"
-print("Test at regex101.com:\r\n\t\t" + myregex)
+# myregex = ""
+# for item in headers:
+    # myregex += "(.{" + str(headers[item]) + "})"
+# print("Test at regex101.com:\r\n\t\t" + myregex)
 
 
-# In[ ]:
-
-
-index = 1
-print("How your stuff lines up, with starting position of 1:")
-largestitem = 0
-for item in headers:
-    if len(item) > largestitem:
-        largestitem = len(item)
-for item in headers:
-    print(f"{item}{((largestitem - len(item)) + 3) * ' '}{index}\t{headers[item] - 1 + index}")
-    index += headers[item]
-
-
-# In[ ]:
-
+# index = 1
+# print("How your stuff lines up, with starting position of 1:")
+# largestitem = 0
+# for item in headers:
+    # if len(item) > largestitem:
+        # largestitem = len(item)
+# for item in headers:
+    # print(f"{item}{((largestitem - len(item)) + 3) * ' '}{index}\t{headers[item] - 1 + index}")
+    # index += headers[item]
 
 rawlist = []
 for row in rows:
@@ -201,19 +147,11 @@ for row in rows:
         counter += headers[item]
     rawlist.append(line)
 
-
-# In[ ]:
-
-
 # with open("OH-Franklin-report.csv", "w", newline="") as f:
 #    writer = csv.writer(f)
 #    writer.writerow(list(headers.keys()))
 #    for row in rawlist:
 #        writer.writerow(list(row.values()))
-
-
-# In[ ]:
-
 
 getcontext().prec = 10      # Precision
 
@@ -225,32 +163,13 @@ lineheaders = ["id", "raceid", "racetype", "racetypeid", "ballotorder", "candida
                "seatnum", "statename", "statepostal", "test", "uncontested", "votecount", "votepct", "winner"
                ]
 
-
-# In[ ]:
-
-
-rawlist[0].keys()
-
-
-# In[ ]:
-
-
 masterlist = []
 racevotes = {}
 crosswalk = {
     "totalvotes": "votecount",
     "contestnumber": "ballotorder",
     "contesttitle": "officename"
-#    "line number": "ballotorder",
-#    "party name": "party",
-#    "total votes": "votecount",
-#    "percent of votes": "votepct",
-#    "ballots cast": "electtotal"
     }
-
-
-# In[ ]:
-
 
 for row in rawlist:
     if row["candidatename"] not in candidatesunwanted:
@@ -278,7 +197,7 @@ for row in rawlist:
         line['level'] = "subunit"
         line['id'] = slugify(line['raceid'] + " " + line['reportingunitid'])
         masterlist.append(line)
-        
+
 for i, line in enumerate(masterlist):
     masterlist[i]["electtotal"] = racevotes[line["raceid"]]
 
@@ -287,26 +206,9 @@ for i, line in enumerate(masterlist):
     if line["votepct"] != "0" and line['votepct'] != "":
         masterlist[i]["votepct"] = Decimal(line["votecount"])/(100 * line['electtotal'])    # Number isn't a percentage; ranges from 0 to 1.
 
-
-# In[ ]:
-
-
 with open(targetfilename, "w", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(lineheaders)
     for row in masterlist:
         writer.writerow(list(row.values()))
 print(f"Done parsing out {countyname} to {targetfilename}")
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
