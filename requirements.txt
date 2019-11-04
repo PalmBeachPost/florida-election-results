@@ -3,3 +3,4 @@ requests
 selenium
 beautifulsoup4
 pyquery
+pysftp
