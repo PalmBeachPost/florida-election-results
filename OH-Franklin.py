@@ -1,6 +1,6 @@
 from slugify import slugify    # External dependency. See requirements.txt
-import pysftp
-import paramiko
+# import pysftp
+# import paramiko
 
 import configuration        # Local configuration file configuration.py
 
@@ -11,7 +11,7 @@ import datetime
 from decimal import *
 import subprocess
 
-exec(open("./OH-Franklin-creds.py").read())     # Local config file just for this
+exec(open("../florida-election-results/OH-Franklin-creds.py").read())     # Local config file just for this
 
 
 """
@@ -31,7 +31,7 @@ electiondate = configuration.electiondate
 timestamp = datetime.datetime.strftime(rawtime, "%Y%m%d-%H%M%S")
 lastupdated = datetime.datetime.strftime(rawtime, "%Y-%m-%dT%H:%M:%S")
 filepath = snapshotsdir + slugify(countyname) + "/" + timestamp + "/"
-# targetfilename = targetdir + "70-" + slugify(countyname) + ".csv"
+targetfilename = targetdir + "70-" + countyname + ".csv"
 os.makedirs(targetdir, exist_ok=True)
 os.makedirs(filepath, exist_ok=True)
 
@@ -196,6 +196,13 @@ for row in rawlist:
         line['lastupdated'] = lastupdated
         line['level'] = "subunit"
         line['id'] = slugify(line['raceid'] + " " + line['reportingunitid'])
+        line['precinctstotal'] = 1
+        try:
+            line['votecount'] = int(line['votecount'])
+        except:
+            line['votecount'] = 0
+        if line['votecount'] != 0:
+            line['precinctsreporting'] = 1
         masterlist.append(line)
 
 for i, line in enumerate(masterlist):
