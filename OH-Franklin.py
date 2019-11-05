@@ -203,6 +203,8 @@ for row in rawlist:
             line['votecount'] = 0
         if line['votecount'] != 0:
             line['precinctsreporting'] = 1
+        else:
+            line['precinctsreporting'] = 0
         masterlist.append(line)
 
 for i, line in enumerate(masterlist):
