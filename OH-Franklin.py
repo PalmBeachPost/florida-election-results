@@ -207,6 +207,31 @@ for row in rawlist:
             line['precinctsreporting'] = 0
         masterlist.append(line)
 
+# Now, a quick fudge for precinct-level results. We handled this differently in Broward, right?
+# Polls close in 95 minutes. Nevermind.
+
+precinctstotal = {}
+precinctsreporting = {}
+
+for line in masterlist:
+    raceid = line['raceid']
+    if raceid not in precinctstotal:
+         precinctstotal[raceid] = {}
+         precinctsreporting[raceid] = {}
+         precinctstotal[raceid]["candidateid"] = line['candidateid']
+         precinctsreporting[raceid]["candidateid"] = line['candidateid']
+         precinctsreporting[raceid]["precinctsreporting"] = 0
+         precinctstotal[raceid]["precinctstotal"] = 0
+    if line['candidateid'] in precinctstotal[raceid]["candidateid"]:
+         precinctstotal[raceid]["precinctstotal"] += 1
+         if line['precinctsreporting'] == 1:
+             precinctsreporting[raceid]['precinctsreporting'] += 1
+
+# Now, loop back and include all those counts
+for i, line in enumerate(masterlist):
+    masterlist[i]['precinctsreporting'] = precinctsreporting[line['raceid']]['precinctsreporting']
+    masterlist[i]['precinctstotal'] = precinctstotal[line['raceid']]['precinctstotal']
+
 for i, line in enumerate(masterlist):
     masterlist[i]["electtotal"] = racevotes[line["raceid"]]
 
