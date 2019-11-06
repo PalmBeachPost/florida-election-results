@@ -202,7 +202,7 @@ for row in rawlist:
         except:
             line['votecount'] = 0
         try:
-            edayvoting = int(row['votesgroup3edaypaper'])
+            edayvoting = int(row['votesgroup3edaypaper']) + int(row['votesgroup4edayivo'])
         except:
             edayvoting = 0
         if edayvoting != 0:
