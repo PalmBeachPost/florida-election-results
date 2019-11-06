@@ -22,6 +22,8 @@ Put into run-everything script
 
 """
 
+badprecincts = ['Delaware County', 'Fairfield County']
+
 sourcefilename = "19GOHFRA.ASC"
 countyname = "OH-Franklin"
 rawtime = datetime.datetime.now()
@@ -214,7 +216,8 @@ for row in rawlist:
             line['precinctsreporting'] = 1
         else:
             line['precinctsreporting'] = 0
-        masterlist.append(line)
+        if row['precinctname'] not in badprecincts:
+            masterlist.append(line)
 
 # Now, a quick fudge for precinct-level results. We handled this differently in Broward, right?
 # Polls close in 95 minutes. Nevermind.
