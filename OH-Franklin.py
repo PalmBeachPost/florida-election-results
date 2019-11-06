@@ -10,6 +10,7 @@ import os
 import datetime
 from decimal import *
 import subprocess
+import sys
 
 exec(open("../florida-election-results/OH-Franklin-creds.py").read())     # Local config file just for this
 
@@ -82,7 +83,11 @@ username = creds['username']
 fulltarget = f"{filepath}{sourcefilename}"
 print("Attempting to download file")
 command = f"pscp -l {username} -pw {password} {hostname}:{sourcefilename} {fulltarget}"
-subprocess.run(command.split(), stdout=subprocess.DEVNULL)
+vodka = subprocess.run(command.split(), stdout=subprocess.DEVNULL)
+if vodka.returncode != 0:
+    print(f"Download failed for {countyname}")
+    sys.exit()
+
 print("Attempt done")
 
 # Let's keep "Write-in" here, but flag per tradition to drop in middleware.
