@@ -201,7 +201,11 @@ for row in rawlist:
             line['votecount'] = int(line['votecount'])
         except:
             line['votecount'] = 0
-        if line['votecount'] != 0:
+        try:
+            edayvoting = int(row['votesgroup3edaypaper'])
+        except:
+            edayvoting = 0
+        if edayvoting != 0:
             line['precinctsreporting'] = 1
         else:
             line['precinctsreporting'] = 0
